@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Checkout</title>
+</head>
+<body>
+<form id="checkoutForm">
+    <!-- Display cart items here -->
+    <!-- Total amount -->
+    <label for="shippingMethod">Choose a shipping method:</label>
+    <select id="shippingMethod" name="shippingMethod">
+        <option value="STANDARD">Standard Shipping</option>
+        <option value="EXPRESS">Express Shipping</option>
+        <option value="INTERNATIONAL">International Shipping</option>
+
+    </select>
+    <button type="submit">Place Order</button>
+</form>
+
+<script>
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const cartItemsContainer = document.createElement('div');
+        let totalAmount = 0;
+
+        cart.forEach(game => {
+            const itemDiv = document.createElement('div');
+            itemDiv.textContent = `${game.gameName} - $${game.price} x ${game.quantity}`;
+            cartItemsContainer.appendChild(itemDiv);
+
+            totalAmount += game.price * game.quantity;
+        });
+
+        const totalAmountDiv = document.createElement('div');
+        totalAmountDiv.textContent = `Total: $${totalAmount.toFixed(2)}`;
+        cartItemsContainer.appendChild(totalAmountDiv);
+
+        const form = document.getElementById('checkoutForm');
+        form.insertBefore(cartItemsContainer, form.firstChild);
+    });
+
+    document.getElementById('checkoutForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const shippingMethod = document.getElementById('shippingMethod').value;
+        // Create an order object with gameId, quantity, userId, order dateTime, and shippingMethod
+        const order = {
+            items: cart.map(item => ({
+                gameId: item.gameId,
+                quantity: item.quantity
+                // Add other relevant item details if needed
+            })),
+            shippingMethod: shippingMethod,
+            username: localStorage.getItem('username'), // Replace with actual user ID
+            orderDateTime: new Date().toISOString() // Current date-time
+        };
+        console.log(order)
+
+        fetch('http://localhost:8080/orders/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(order)
+
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Handle successful order placement
+            })
+            .catch(error => {
+                console.error('There has been a problem with your fetch operation:', error);
+            });
+    });
+
+</script>
+</body>
+</html>

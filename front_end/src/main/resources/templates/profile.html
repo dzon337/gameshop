@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .user-card {
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            width: 300px;
+        }
+        .user-name {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .add-friend-btn, .go-back-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: block;
+            margin: 10px auto;
+        }
+        .add-friend-btn:hover, .go-back-btn:hover {
+            background-color: #45a049;
+        }
+        .go-back-btn {
+            background-color: #6c757d;
+        }
+        .go-back-btn::before {
+            content: '← ';
+        }
+        .user-found {
+            color: #28a745;
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        .message {
+            color: #28a745;
+            font-size: 16px;
+            margin-top: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="user-card">
+    <div class="user-name" id="userName">User Name</div>
+    <div class="user-found" id="userFound"></div>
+    <button class="add-friend-btn" onclick="addFriend()">Add Friend</button>
+    <div class="message" id="friendRequestMessage"></div>
+    <a href="/home" class="go-back-btn">Go Back</a>
+</div>
+
+<script>
+    window.onload = function() {
+        var searchedUser = localStorage.getItem('searchedUser');
+        if (searchedUser) {
+            document.getElementById('userName').textContent = searchedUser;
+            document.getElementById('userFound').textContent = 'User is found';
+        } else {
+            document.getElementById('userName').textContent = 'User not found';
+            document.getElementById('userFound').textContent = '';
+        }
+    };
+
+    function addFriend() {
+        var fromUsername = localStorage.getItem('username'); // Retrieve the current logged-in user's username
+        var toUsername = document.getElementById('userName').textContent;
+
+        fetch('http://localhost:8080/user/sendFriendRequest', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                fromUsername: fromUsername,
+                toUsername: toUsername
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                var messageElement = document.getElementById('friendRequestMessage');
+                messageElement.textContent = data;
+                messageElement.style.display = 'block';
+                setTimeout(function() {
+                    messageElement.style.display = 'none';
+                }, 3000);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+
+
+</script>
+</body>
+</html>

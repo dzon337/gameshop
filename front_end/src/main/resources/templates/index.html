@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Library</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+</head>
+<body>
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Game Library</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto" id="nav-items">
+            <li class="nav-item">
+                <a class="nav-link"  id="cart-button">
+                    <i class="fas fa-shopping-cart"></i> Cart <span id="cart-counter">0</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/login">Login</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/register">Register</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div class="container mt-5">
+    <h1 class="text-center">Game Library</h1>
+    <div id="game-list" class="row"></div>
+</div>
+<!-- Cart Modal -->
+<div id="cartPopup" class="cart-popup" style="display:none;">
+    <div class="cart-popup-content">
+        <span class="close-cart-popup" onclick="closeCartPopup()">&times;</span>
+        <h2>Your Shopping Cart</h2>
+        <div id="cartItemsList">
+            <!-- Cart items will be listed here -->
+        </div>
+        <div id="cartTotalPrice"></div>
+        <button onclick="goToCheckout()" class="btn btn-primary">Go to Checkout</button>
+    </div>
+</div>
+<style>
+    .review-item {
+        border-top: 1px solid #ddd;
+        padding: 10px 0;
+    }
+
+    #game-reviews h3 {
+        margin-top: 20px;
+    }
+
+    .genre-list p {
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+    .genre-description {
+        font-weight: normal;
+        text-indent: 20px;
+    }
+    .platform-list p {
+        margin-bottom: 0;
+    }
+    .cart-popup {
+        position: fixed;
+        right: 20px;
+        top: 50px;
+        border: 1px solid #ddd;
+        background-color: #fff;
+        z-index: 1000;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        width: 700px; /* Increased width */
+    }
+    .cart-popup-content {
+        position: relative;
+    }
+    .close-cart-popup {
+        position: absolute;
+        right: 20px;
+        top: 0;
+        font-size: 24px;
+        cursor: pointer;
+    }
+    .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .quantity-control button {
+        border: none;
+        background-color: #007bff;
+        color: white;
+        font-size: 16px;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .quantity-control button:hover {
+        background-color: #0056b3;
+    }
+
+    .quantity-control span {
+        min-width: 20px;
+        text-align: center;
+    }
+</style>
+<!-- Modal -->
+<div class="modal fade" id="gameModal" tabindex="-1" role="dialog" aria-labelledby="gameModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document"> <!-- modal-lg class for larger modal -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="gameModalLabel">Game Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Game details go here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script>
+    let cart = [];
+    let gamesData = []; // Store the fetched games data
+
+
+
+    function updateCartCounter() {
+        document.getElementById('cart-counter').textContent = cart.reduce((acc, item) => acc + item.quantity, 0);
+    }
+
+
+    function addToCart(gameId) {
+        const game = gamesData.find(g => g.gameId === gameId);
+        if (game) {
+            let cartItem = cart.find(item => item.gameId === gameId);
+            if (cartItem) {
+                cartItem.quantity++;
+            } else {
+                cart.push({...game, quantity: 1});
+            }
+            updateCartCounter();
+            displayCartPopup();
+        }
+    }
+
+
+    function displayCartPopup() {
+        const cartItemsList = document.getElementById('cartItemsList');
+        cartItemsList.innerHTML = ''; // Clear existing items
+
+        cart.forEach(game => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'cart-item';
+            itemDiv.innerHTML = `
+                    <span>${game.gameName} - $${game.price}</span>
+                    <div class="quantity-control">
+                        <button onclick="changeQuantity(${game.gameId}, -1)">-</button>
+                        <span>${game.quantity}</span>
+                        <button onclick="changeQuantity(${game.gameId}, 1)">+</button>
+                    </div>`;
+            cartItemsList.appendChild(itemDiv);
+        });
+
+        updateTotalPrice();
+        document.getElementById('cartPopup').style.display = 'block';
+    }
+
+    function updateTotalPrice() {
+        const totalPrice = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+        document.getElementById('cartTotalPrice').innerHTML = `Total Price: $${totalPrice.toFixed(2)}`;
+    }
+
+    function changeQuantity(gameId, change) {
+        let cartItem = cart.find(item => item.gameId === gameId);
+        if (cartItem) {
+            cartItem.quantity = Math.max(0, cartItem.quantity + change);
+            displayCartPopup();
+            updateCartCounter();
+        }
+        if (cartItem.quantity ===0){
+            cart.pop();
+            displayCartPopup();
+            updateCartCounter();
+        }
+    }
+
+    function closeCartPopup() {
+        document.getElementById('cartPopup').style.display = 'none';
+    }
+
+    function goToCheckout() {
+        localStorage.setItem('cart', JSON.stringify(cart));
+
+        window.location.href = "/checkout"
+
+    }
+
+
+    document.addEventListener("DOMContentLoaded", function() {
+        fetch('http://localhost:8080/games/all')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {renderGames(data); gamesData= data;})
+            .catch(error => console.error('Error fetching data:', error));
+
+        function renderGames(games) {
+            const container = document.getElementById('game-list');
+            container.innerHTML = '';
+
+            games.forEach(game => {
+                const gameElement = document.createElement('div');
+                gameElement.className = 'col-md-4 mb-3';
+                gameElement.innerHTML = `
+            <div class="card">
+                <div class="card-body">
+
+                    <h5 class="card-title" onclick="showGameDetails(${JSON.stringify(game).split('"').join("&quot;")})">${game.gameName} ($${game.price})</h5>
+                    <p class="card-text">Genres: ${game.genres.map(g => g.genreName).join(', ')}</p>
+                    <p class="card-text">Platforms: ${game.platforms.map(p => p.platformName).join(', ')}</p>
+                    <button onclick="addToCart(${game.gameId})" class="btn btn-primary">Buy</button>
+                </div>
+            </div>
+            `;
+                container.appendChild(gameElement);
+            });
+        }
+        updateNavBar();
+
+        function updateNavBar() {
+            const navItems = document.getElementById('nav-items');
+            // Example check - replace with your actual login check logic
+            const isLoggedIn = localStorage.getItem('isLoggedIn'); // You should set this item in local storage on login
+
+            if (isLoggedIn) {
+                const username = localStorage.getItem('username'); // Assuming you store the username in local storage on login
+                navItems.innerHTML = `
+                <li class="nav-item">
+                    <span class="nav-link">Logged in as ${username}</span>
+                </li>
+            <li class="nav-item">
+                <a class="nav-link"  id="cart-button">
+                    <i class="fas fa-shopping-cart"></i> Cart <span id="cart-counter">0</span>
+                </a>
+            </li>
+               <li class="nav-item">
+                    <form class="form-inline my-2 my-lg-0">
+                        <input class="form-control mr-sm-2" type="search" placeholder="Search Users" aria-label="Search">
+                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                    </form>
+                </li>
+            `;
+            } else {
+                navItems.innerHTML = `
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/register">Register</a>
+                </li>
+           <li class="nav-item">
+                <a class="nav-link"  id="cart-button">
+                    <i class="fas fa-shopping-cart"></i> Cart <span id="cart-counter">0</span>
+                </a>
+            </li>
+            `;
+            }
+        }
+        window.showGameDetails = function(game) {
+            $('#gameModalLabel').text(game.gameName);
+            $('.modal-body').html(`
+        <p><strong>Price:</strong> $${game.price}</p>
+        <div class="genre-list">
+            ${game.genres.map(g => `<p>${g.genreName}</p><p class="genre-description">${g.description}</p>`).join('')}
+        </div>
+        <div class="platform-list">
+            <p><strong>Platforms:</strong> ${game.platforms.map(p => `${p.platformName} (${p.manufacturer})`).join(', ')}</p>
+        </div>
+         <div id="game-reviews">
+            <h3>Reviews:</h3>
+            <div>Loading reviews...</div>
+        </div>
+    `);
+            $('#gameModal').modal('show');
+            fetch(`http://localhost:8080/games/${game.gameId}/reviews`)
+                .then(response => response.json())
+                .then(reviews => {
+                    let reviewsHtml = reviews.map(review => `
+                <div class="review-item">
+                    <p>Rating: ${review.rating}</p>
+                    <p>${review.reviewText}</p>
+                </div>
+            `).join('');
+                    document.getElementById('game-reviews').innerHTML = `<h3>Reviews:</h3>${reviewsHtml}`;
+                })
+                .catch(error => {
+                    console.error('Error fetching reviews:', error);
+                    document.getElementById('game-reviews').innerHTML = '<p>Error loading reviews.</p>';
+                });
+        }
+        const searchForm = document.querySelector('.navbar .form-inline');
+        searchForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const searchQuery = this.querySelector('input[type="search"]').value;
+            fetch(`http://localhost:8080/user/search`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: searchQuery
+                })
+            })
+
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return JSON.stringify(response.text());
+                }).then(data => {
+                localStorage.setItem('searchedUser', searchQuery);
+
+                window.location.href = "/profile"
+            })
+
+                .catch(error => console.error('Error fetching user:', error));
+        });
+
+        document.getElementById('cart-button').addEventListener('click', function() {
+            displayCartPopup();
+        });
+
+
+
+    });
+</script>
+</body>
+</html>
