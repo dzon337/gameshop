@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+  gameshopdb:
+    container_name: gameshopdb
+    image: mysql:8.0.32
+    environment:
+      MYSQL_DATABASE: gameshop
+      MYSQL_ROOT_PASSWORD: 12345
+
+  backend:
+    build:
+      context: ./backend
+    container_name: backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - gameshopdb
+    links:
+      - gameshopdb
+    environment:
+      - MYSQL_HOST=gameshopdb
+      - MYSQL_PORT=3306
+      - MYSQL_USERNAME=root
+      - MYSQL_PASSWORD=12345
+  frontend:
+    build: ./front_end
+    restart: always
+    ports:
+      - "8081:8080"
+
+
+volumes:
+  mysql-data:
