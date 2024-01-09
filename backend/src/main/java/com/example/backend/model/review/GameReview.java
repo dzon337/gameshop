@@ -39,6 +39,7 @@ public class GameReview {
     @MapsId("gameId")
     @JsonBackReference
     @JoinColumn(name = "game_id", nullable = false)
+    @ToString.Exclude
     private Game game;
 
     public void setGame(final Game game) {this.game = game;}

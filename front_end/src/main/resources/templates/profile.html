@@ -97,18 +97,31 @@
                 toUsername: toUsername
             })
         })
-            .then(response => response.json())
+            .then(response => {
+                if (response.status === 200) {
+                    // If the response status is 200, show success message
+                    showFriendRequestMessage('User is successfully added');
+                } else {
+                    // Otherwise, parse and show error message from the response
+                    showFriendRequestMessage('User is already in your friendlist');
+                }
+            })
             .then(data => {
-                var messageElement = document.getElementById('friendRequestMessage');
-                messageElement.textContent = data;
-                messageElement.style.display = 'block';
-                setTimeout(function() {
-                    messageElement.style.display = 'none';
-                }, 3000);
+                if (data) {
+                    showFriendRequestMessage(data);
+                }
             })
             .catch((error) => {
                 console.error('Error:', error);
             });
+    }
+    function showFriendRequestMessage(message) {
+        var messageElement = document.getElementById('friendRequestMessage');
+        messageElement.textContent = message;
+        messageElement.style.display = 'block';
+        setTimeout(function() {
+            messageElement.style.display = 'none';
+        }, 3000);
     }
 
 

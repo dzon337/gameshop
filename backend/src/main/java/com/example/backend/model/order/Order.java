@@ -36,6 +36,7 @@ public class Order {
     @ManyToOne
     @JsonBackReference
     @JoinColumn(name = "user_id")
+    @ToString.Exclude
     private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

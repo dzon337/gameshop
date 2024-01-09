@@ -25,12 +25,14 @@ public class OrderGame {
     @MapsId("orderId")
     @JoinColumn(name = "order_id")
     @JsonManagedReference
+    @ToString.Exclude
     private Order order;
 
     @ManyToOne
     @MapsId("gameId")
     @JsonManagedReference
     @JoinColumn(name = "game_id")
+    @ToString.Exclude
     private Game game;
 
     @Column(name="quantity")

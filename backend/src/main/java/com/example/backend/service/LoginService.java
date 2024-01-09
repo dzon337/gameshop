@@ -32,7 +32,7 @@ public class LoginService {
         var userOptional = userRepository.findUserByUsername(request.getUsername());
         System.out.println("USERNAME"+ userOptional);
         if (userOptional.isPresent()) {
-        return "User is found";
+            return "User is found";
         } else {
             throw new RuntimeException("User not found");
         }

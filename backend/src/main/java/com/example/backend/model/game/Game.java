@@ -69,7 +69,6 @@ public class Game {
     @JsonManagedReference
     @Builder.Default
     @ToString.Exclude
-
     private Set<Platform> platforms = new HashSet<>();
 
     public void addPlatforms(final Collection<Platform> platforms) {
@@ -81,7 +80,6 @@ public class Game {
     @JsonManagedReference
     @Builder.Default
     @ToString.Exclude
-
     private Set<GameReview> reviews = new HashSet<>();
 
     public void addReview(final GameReview review) {
@@ -92,7 +90,7 @@ public class Game {
     @OneToMany(mappedBy = "game")
     @JsonBackReference
     @Builder.Default
-
+    @ToString.Exclude
     private Set<OrderGame> orderGames = new HashSet<>();
 
     public void addOrderGames(final Collection<OrderGame> orderGames) {
