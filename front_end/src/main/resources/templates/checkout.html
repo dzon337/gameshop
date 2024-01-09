@@ -3,20 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <title>Checkout</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .total-amount {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .place-order-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .place-order-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-<form id="checkoutForm">
-    <!-- Display cart items here -->
-    <!-- Total amount -->
-    <label for="shippingMethod">Choose a shipping method:</label>
-    <select id="shippingMethod" name="shippingMethod">
-        <option value="STANDARD">Standard Shipping</option>
-        <option value="EXPRESS">Express Shipping</option>
-        <option value="INTERNATIONAL">International Shipping</option>
+<div class="container">
+    <form id="checkoutForm">
+        <div id="cartItemsContainer"></div> <!-- Cart items will be added here -->
+        <div class="form-group">
+            <label for="shippingMethod">Choose a shipping method:</label>
+            <select id="shippingMethod" name="shippingMethod" class="form-control">
+                <option value="STANDARD">Standard Shipping</option>
+                <option value="EXPRESS">Express Shipping</option>
+                <option value="INTERNATIONAL">International Shipping</option>
+            </select>
+        </div>
+        <button type="submit" class="place-order-btn">Place Order</button>
+    </form>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    </select>
-    <button type="submit">Place Order</button>
-</form>
 
 <script>
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -72,7 +108,12 @@
                 return response.json();
             })
             .then(data => {
-                // Handle successful order placement
+                const successMessageDiv = document.createElement('div');
+                successMessageDiv.textContent = 'Order successfully created!';
+                successMessageDiv.style.color = 'green'; // Style the message
+
+                // Append the success message to the container or another suitable element
+                document.querySelector('.container').appendChild(successMessageDiv);
             })
             .catch(error => {
                 console.error('There has been a problem with your fetch operation:', error);

@@ -31,6 +31,36 @@
         </ul>
     </div>
 </nav>
+<div class="container mt-3">
+    <div class="row">
+        <div class="col">
+            <select id="filterGenre" class="form-control">
+                <option value="">Filter by Genre</option>
+                <!-- Options will be populated here -->
+            </select>
+        </div>
+        <div class="col">
+            <input type="number" id="filterPrice" class="form-control" placeholder="Max Price">
+        </div>
+        <div class="col">
+            <select id="filterPlatform" class="form-control">
+                <option value="">Filter by Platform</option>
+                <!-- Options will be populated here -->
+            </select>
+        </div>
+        <div class="col">
+            <select id="sortRating" class="form-control">
+                <option value="">Sort by Rating</option>
+                <option value="asc">Low to High</option>
+                <option value="desc">High to Low</option>
+            </select>
+        </div>
+        <div class="col">
+            <button onclick="applyFilters()" class="btn btn-primary">Apply Filters</button>
+        </div>
+    </div>
+</div>
+
 <div class="container mt-5">
     <h1 class="text-center">Game Library</h1>
     <div id="game-list" class="row"></div>
@@ -215,9 +245,80 @@
         window.location.href = "/checkout"
 
     }
+    function applyFilters() {
+        const genreFilter = document.getElementById('filterGenre').value;
+        const priceFilter = parseFloat(document.getElementById('filterPrice').value);
+        const platformFilter = document.getElementById('filterPlatform').value;
+        const sortRating = document.getElementById('sortRating').value;
 
+        let filteredGames = gamesData;
+
+        // Filter by Genre
+        if (genreFilter) {
+            filteredGames = filteredGames.filter(game => game.genres.some(g => g.genreName === genreFilter));
+        }
+
+        // Filter by Price
+        if (priceFilter) {
+            filteredGames = filteredGames.filter(game => game.price <= priceFilter);
+        }
+
+        // Filter by Platform
+        if (platformFilter) {
+            filteredGames = filteredGames.filter(game => game.platforms.some(p => p.platformName === platformFilter));
+        }
+
+        // Sort by Rating
+        if (sortRating) {
+            filteredGames.sort((a, b) => sortRating === 'asc' ? a.averageRating - b.averageRating : b.averageRating - a.averageRating);
+        }
+
+        renderGames(filteredGames);
+    }
+    function renderGames(games) {
+        const container = document.getElementById('game-list');
+        container.innerHTML = '';
+
+        games.forEach(game => {
+            const gameElement = document.createElement('div');
+            gameElement.className = 'col-md-4 mb-3';
+            gameElement.innerHTML = `
+            <div class="card">
+                <div class="card-body">
+
+                    <h5 class="card-title" onclick="showGameDetails(${JSON.stringify(game).split('"').join("&quot;")})">${game.gameName} ($${game.price})</h5>
+                    <p class="card-text">Genres: ${game.genres.map(g => g.genreName).join(', ')}</p>
+                    <p class="card-text">Platforms: ${game.platforms.map(p => p.platformName).join(', ')}</p>
+                                        <p class="card-text">Average Rating: ${game.averageRating.toFixed(1)}</p>
+
+                    <button onclick="addToCart(${game.gameId})" class="btn btn-primary">Buy</button>
+                </div>
+            </div>
+            `;
+            container.appendChild(gameElement);
+        });
+    }
 
     document.addEventListener("DOMContentLoaded", function() {
+        // Populate genres
+        const genres = ["SHOOTER", "SPORTS", "ADVENTURE", "OPEN_WORLD", "ACTION", "ROLE_PLAY", "RACING", "FIGHTING", "HORROR", "MULTIPLAYER"];
+        const genreSelect = document.getElementById('filterGenre');
+        genres.forEach(genre => {
+            const option = document.createElement('option');
+            option.value = genre;
+            option.textContent = genre;
+            genreSelect.appendChild(option);
+        });
+
+        // Populate platforms
+        const platforms = ["PLAYSTATION_5", "PLAYSTATION_4", "PLAYSTATION_2", "XBOX_360", "XBOX_SERIES_X", "NINTENDO_SWITCH", "PERSONAL_COMPUTER"];
+        const platformSelect = document.getElementById('filterPlatform');
+        platforms.forEach(platform => {
+            const option = document.createElement('option');
+            option.value = platform;
+            option.textContent = platform;
+            platformSelect.appendChild(option);
+        });
         fetch('http://localhost:8080/games/all')
             .then(response => {
                 if (!response.ok) {
@@ -225,31 +326,25 @@
                 }
                 return response.json();
             })
-            .then(data => {renderGames(data); gamesData= data;})
+            .then(games => {
+                games.forEach(game => {
+                    game.averageRating = calculateAverageRating(game.reviews);
+                });
+                renderGames(games);
+                gamesData = games;
+            })
             .catch(error => console.error('Error fetching data:', error));
 
-        function renderGames(games) {
-            const container = document.getElementById('game-list');
-            container.innerHTML = '';
 
-            games.forEach(game => {
-                const gameElement = document.createElement('div');
-                gameElement.className = 'col-md-4 mb-3';
-                gameElement.innerHTML = `
-            <div class="card">
-                <div class="card-body">
-
-                    <h5 class="card-title" onclick="showGameDetails(${JSON.stringify(game).split('"').join("&quot;")})">${game.gameName} ($${game.price})</h5>
-                    <p class="card-text">Genres: ${game.genres.map(g => g.genreName).join(', ')}</p>
-                    <p class="card-text">Platforms: ${game.platforms.map(p => p.platformName).join(', ')}</p>
-                    <button onclick="addToCart(${game.gameId})" class="btn btn-primary">Buy</button>
-                </div>
-            </div>
-            `;
-                container.appendChild(gameElement);
-            });
-        }
         updateNavBar();
+        function calculateAverageRating(reviews) {
+            if (!reviews || reviews.length === 0) {
+                return 0; // Return 0 if there are no reviews
+            }
+            const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+            return totalRating / reviews.length;
+        }
+
 
         function updateNavBar() {
             const navItems = document.getElementById('nav-items');

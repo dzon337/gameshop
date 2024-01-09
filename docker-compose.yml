@@ -1,34 +1,49 @@
-version: "3"
+  version: "3"
+  services:
+    gameshopdb:
+      container_name: gameshopdb
+      image: mysql:8.0.32
+      environment:
+        MYSQL_DATABASE: gameshop
+        MYSQL_ROOT_PASSWORD: 12345
+      healthcheck:
+        test: mysqladmin ping -h localhost --user root --password=12345
+        timeout: 5s
+        retries: 10
+      volumes:
+        - ./mysql-data:/var/lib/mysql
+      restart: always
 
-services:
-  gameshopdb:
-    container_name: gameshopdb
-    image: mysql:8.0.32
-    environment:
-      MYSQL_DATABASE: gameshop
-      MYSQL_ROOT_PASSWORD: 12345
+    backend:
+      build:
+        context: ./backend
+      container_name: backend
+      ports:
+        - "8080:8080"
+      environment:
+        - MYSQL_HOST=gameshopdb
+        - MYSQL_PORT=3306
+        - MYSQL_USERNAME=root
+        - MYSQL_PASSWORD=12345
+      depends_on:
+        gameshopdb:
+          condition: service_healthy
+      links:
+        - gameshopdb
+      healthcheck:
+        test: curl --location 'http://localhost:8080'
+        timeout: 15s
+        retries: 10
 
-  backend:
-    build:
-      context: ./backend
-    container_name: backend
-    ports:
-      - "8080:8080"
-    depends_on:
-      - gameshopdb
-    links:
-      - gameshopdb
-    environment:
-      - MYSQL_HOST=gameshopdb
-      - MYSQL_PORT=3306
-      - MYSQL_USERNAME=root
-      - MYSQL_PASSWORD=12345
-  frontend:
-    build: ./front_end
-    restart: always
-    ports:
-      - "8081:8080"
+    frontend:
+      build: ./front_end
+      ports:
+        - "8081:8080"
+      depends_on:
+        backend:
+          condition: service_healthy
+
+  volumes:
+    mysql-data:
 
 
-volumes:
-  mysql-data:
