@@ -53,6 +53,7 @@ public class Game {
             inverseJoinColumns = @JoinColumn(name = "genre_id"))
     @JsonManagedReference
     @Builder.Default
+    @ToString.Exclude
     private Set<Genre> genres = new HashSet<>();
 
     public void addGenres(final Collection<Genre> genres) {
@@ -67,6 +68,8 @@ public class Game {
             inverseJoinColumns = @JoinColumn(name = "platform_id"))
     @JsonManagedReference
     @Builder.Default
+    @ToString.Exclude
+
     private Set<Platform> platforms = new HashSet<>();
 
     public void addPlatforms(final Collection<Platform> platforms) {
@@ -77,6 +80,8 @@ public class Game {
     @OneToMany(mappedBy = "game")
     @JsonManagedReference
     @Builder.Default
+    @ToString.Exclude
+
     private Set<GameReview> reviews = new HashSet<>();
 
     public void addReview(final GameReview review) {
@@ -85,8 +90,9 @@ public class Game {
 
     // All the orders in which a game is to be found.
     @OneToMany(mappedBy = "game")
-    @JsonManagedReference
+    @JsonBackReference
     @Builder.Default
+
     private Set<OrderGame> orderGames = new HashSet<>();
 
     public void addOrderGames(final Collection<OrderGame> orderGames) {

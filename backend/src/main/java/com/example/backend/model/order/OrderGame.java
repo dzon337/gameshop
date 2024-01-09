@@ -1,6 +1,8 @@
 package com.example.backend.model.order;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import java.util.Objects;
 import jakarta.persistence.*;
@@ -21,13 +23,13 @@ public class OrderGame {
 
     @ManyToOne
     @MapsId("orderId")
-    @JsonIgnore
-
     @JoinColumn(name = "order_id")
+    @JsonManagedReference
     private Order order;
 
     @ManyToOne
     @MapsId("gameId")
+    @JsonManagedReference
     @JoinColumn(name = "game_id")
     private Game game;
 

@@ -39,31 +39,35 @@ public class OrderService {
         var user = userRepository.findUserByUsername(orderRequest.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        var game = gameRepository.findById(Long.parseLong(orderRequest.getGameId()))
-                .orElseThrow(() -> new RuntimeException("Game not found"));
-
-        var orderGameKey = new OrderGameKey(null, game.getGameId());
-        var orderGame = OrderGame.builder()
-                .orderGameId(orderGameKey)
-                .game(game)
-                .quantity(Integer.parseInt(orderRequest.getQuantity()))
-                .build();
         LocalDateTime orderDate = LocalDateTime.ofInstant(
                 Instant.parse(orderRequest.getOrderDateTime()),
                 ZoneId.systemDefault()
         );
-        var orderGames = new HashSet<OrderGame>();
-        orderGames.add(orderGame);
 
-        System.out.println(orderRequest.getShippingMethod());
+        Set<OrderGame> orderGames = new HashSet<>();
+
+        for (OrderRequest.Item item : orderRequest.getItems()) {
+            var game = gameRepository.findById(item.getGameId())
+                    .orElseThrow(() -> new RuntimeException("Game not found for ID: " + item.getGameId()));
+
+            var orderGameKey = new OrderGameKey(null, game.getGameId());
+            var orderGame = OrderGame.builder()
+                    .orderGameId(orderGameKey)
+                    .game(game)
+                    .quantity(item.getQuantity())
+                    .build();
+
+            orderGames.add(orderGame);
+        }
+
         var order = Order.builder()
                 .user(user)
-                .shippingMethod(EShippingMethod.valueOf(orderRequest.getShippingMethod())) // Convert or map to EShippingMethod enum
-                .order_date(orderDate) // Ensure the format matches
+                .shippingMethod(EShippingMethod.valueOf(orderRequest.getShippingMethod()))
+                .order_date(orderDate)
                 .orderGames(orderGames)
                 .build();
 
-        orderGame.setOrder(order); // Set the order in OrderGame
+        orderGames.forEach(orderGame -> orderGame.setOrder(order));
 
         return orderRepository.save(order);
     }

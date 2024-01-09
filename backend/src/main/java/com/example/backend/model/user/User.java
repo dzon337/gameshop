@@ -83,6 +83,7 @@ public class User  {
     @OneToMany(mappedBy = "user")
     @JsonManagedReference
     @Builder.Default
+    @ToString.Exclude // Exclude from toString
     private Set<Order> orders = new HashSet<>();
 
     public void addOrder(final Order order) {
