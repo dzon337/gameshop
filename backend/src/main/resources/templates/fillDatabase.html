@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fill Database</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #007BFF;
+        }
+
+        p {
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+    <script th:inline="javascript">
+        function fillDatabase() {
+            fetch('/fillDatabase', { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Database filled successfully');
+                        location.reload(); // Reload the page after successful filling
+                    } else {
+                        console.error('Error filling database');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</head>
+<body>
+<h1>Welcome to Game Shop backend!</h1>
+<p>After clicking the button, all the data is removed if any present and the database is filled with randomized data.</p>
+<button onclick="fillDatabase()">Fill in Database</button>
+</body>
+</html>

@@ -41,6 +41,7 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference
     @Builder.Default
+    @ToString.Exclude
     private Set<OrderGame> orderGames = new HashSet<>();
 
     public void addOrderGames(final Collection<OrderGame> orderGames) {

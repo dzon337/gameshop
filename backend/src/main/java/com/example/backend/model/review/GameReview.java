@@ -20,6 +20,8 @@ import org.yaml.snakeyaml.events.Event;
 public class GameReview {
     // Used when inserting GameReview objects in the database. It has to be incremented after every insert.
     private static Long GAME_REVIEW_ID = 0L;
+    public final static Integer MIN_GAME_REVIEW_RATING = 1;
+    public final static Integer MAX_GAME_REVIEW_RATING = 5;
 
     @EmbeddedId
     @Column(name="game_review_id", updatable = false)
@@ -45,6 +47,7 @@ public class GameReview {
     @ManyToOne
     @JsonBackReference
     @JoinColumn(name = "user_id")
+    @ToString.Exclude
     private User user;
 
     public void setUser(final User user) {
