@@ -7,11 +7,9 @@ import lombok.AllArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class FriendRequest {
-
-    private String fromUsername;
-    private String toUsername;
-
+@AllArgsConstructor
+public class UpdateGameReviewRequest {
+    private String reviewText;
+    private Integer rating;
 }

@@ -12,6 +12,8 @@ import com.example.backend.repository.IUserRepository;
 import com.example.backend.model.request.GameReviewRequest;
 import com.example.backend.repository.IGameReviewRepository;
 import com.example.backend.exceptions.GameDoesNotExistException;
+import com.example.backend.model.request.UpdateGameReviewRequest;
+import com.example.backend.exceptions.UserAlreadyUploadedGameReviewForThisGameException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,30 +34,49 @@ public class GameReviewService {
         return this.gameReviewRepo.findByGameReviewIdGameId(gameId);
     }
 
-    public List<GameReview> getAllReviews() {
-        return this.gameReviewRepo.findAll();
+    public Optional<GameReview> updateReview(final Long gameId, final Long reviewId, final UpdateGameReviewRequest request) {
+        final GameReviewKey compositeKey = GameReviewKey
+                .builder()
+                .reviewId(reviewId)
+                .gameId(gameId)
+                .build();
+
+        final Optional<GameReview> possibleGameReview = this.gameReviewRepo.findById(compositeKey);
+
+        possibleGameReview.ifPresent(gameReview -> {
+            gameReview.setReviewText(request.getReviewText());
+            gameReview.setRating(request.getRating());
+            this.gameReviewRepo.save(gameReview);
+        });
+
+        return Optional.empty();
     }
 
-    /*
-         First check if user exists.
-         Then check if game exists.
-         Thirdly Validate review text + rating.
-         If all is well add game review to db.
-            Create GameReviewKey and GameReview objects.
-            Set game and user for GameReview.
-            Set review for User and Game.
-         Lastly the GameReview object must be returned.
-     */
-    public GameReview uploadGameReview(final GameReviewRequest request) {
-        final Optional<User> possibleUser = userRepo.findById(request.getUserId());
+    public Optional<GameReview> deleteReview(final Long gameId, final Long reviewId) {
+        final GameReviewKey compositeKey = GameReviewKey
+                                                    .builder()
+                                                    .reviewId(reviewId)
+                                                    .gameId(gameId)
+                                                    .build();
+
+        final Optional<GameReview> possibleGameReview = this.gameReviewRepo.findById(compositeKey);
+        if(possibleGameReview.isPresent()) {
+            this.gameReviewRepo.deleteById(compositeKey);
+        }
+
+        return possibleGameReview;
+    }
+
+    public GameReview uploadGameReview(final Long gameId, final GameReviewRequest request) {
+        final Optional<User> possibleUser = userRepo.findUserByUsername(request.getUsername());
         if(possibleUser.isEmpty()) {
-            final String errMsg = "User with id: [" + request.getUserId() + "] does not exist!";
+            final String errMsg = "User: [" + request.getUsername() + "] does not exist!";
             throw new RuntimeException(errMsg);
         }
 
-        final Optional<Game> possibleGame = gameRepo.findById(request.getGameId());
+        final Optional<Game> possibleGame = gameRepo.findById(gameId);
         if(possibleGame.isEmpty()) {
-            final String errMsg = "Game with id: [" + request.getGameId() + "] does not exist!";
+            final String errMsg = "Game with id: [" + gameId + "] does not exist!";
             throw new GameDoesNotExistException(errMsg);
         }
 
@@ -72,29 +93,44 @@ public class GameReviewService {
             throw new RuntimeException(errMsg);
         }
 
+        // Check if user has already uploaded a review about this specific game. If so -> error.
         final User user = possibleUser.get();
+        final Optional<GameReview> reviewMayAlreadyExist = user
+                .getReviews()
+                .stream()
+                .filter(review -> review.getGameReviewId().getGameId().equals(gameId))
+                .findFirst();
+
+        reviewMayAlreadyExist.ifPresent(review -> {
+                    throw new UserAlreadyUploadedGameReviewForThisGameException();
+                }
+        );
+
         final Game game = possibleGame.get();
         final GameReviewKey gameReviewKey = GameReviewKey
                                                     .builder()
                                                     .reviewId(GameReview.getID())
                                                     .gameId(game.getGameId())
                                                     .build();
+
         final GameReview gameReview = GameReview
                                                     .builder()
                                                     .gameReviewId(gameReviewKey)
                                                     .reviewText(reviewText)
                                                     .rating(rating)
-                                                    .user(user)
-                                                    .game(game)
                                                     .build();
 
-        user.addReview(gameReview);
         game.addReview(gameReview);
+        user.addReview(gameReview);
 
+        gameReview.setGame(game);
+        gameReview.setUser(user);
+
+        this.gameReviewRepo.save(gameReview);
         this.userRepo.save(user);
         this.gameRepo.save(game);
 
-        return this.gameReviewRepo.save(gameReview);
+        return gameReview;
     }
 
 }

@@ -1,20 +1,18 @@
 package com.example.backend.controller;
 
-import com.example.backend.model.request.FriendRequest;
 import com.example.backend.model.request.LoginRequest;
-import com.example.backend.model.request.RegisterRequest;
 import com.example.backend.model.request.SearchRequest;
-import com.example.backend.model.user.User;
-import com.example.backend.repository.IUserRepository;
-import com.example.backend.service.FriendService;
+import com.example.backend.model.request.FriendRequest;
+import com.example.backend.model.request.RegisterRequest;
+
 import com.example.backend.service.LoginService;
+import com.example.backend.service.FriendService;
 import com.example.backend.service.RegisterService;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @CrossOrigin
 @RestController
@@ -24,8 +22,6 @@ public class RegisterController {
     @Autowired
     private RegisterService registerService;
     @Autowired
-    private IUserRepository userRepository; //
-    @Autowired
     private LoginService loginService;
     @Autowired
     private FriendService friendRequestService;
@@ -34,7 +30,8 @@ public class RegisterController {
     public ResponseEntity registerUser(@RequestBody RegisterRequest request) {
         try {
             return ResponseEntity.ok(registerService.register(request));
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -43,7 +40,8 @@ public class RegisterController {
     public ResponseEntity loginUser(@RequestBody LoginRequest request) {
         try {
             return ResponseEntity.ok(loginService.login(request));
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -51,10 +49,11 @@ public class RegisterController {
     public ResponseEntity searchUserByUsername(@RequestBody SearchRequest username) {
         try {
             return ResponseEntity.ok(loginService.search(username));
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
-        }    }
-
+        }
+    }
 
     @PostMapping("/sendFriendRequest")
     public ResponseEntity<?> sendFriendRequest(@RequestBody FriendRequest request) {
@@ -62,7 +61,8 @@ public class RegisterController {
 
         if (requestSent) {
             return ResponseEntity.ok().body("Friend request sent successfully.");
-        } else {
+        }
+        else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to send friend request.");
         }
     }

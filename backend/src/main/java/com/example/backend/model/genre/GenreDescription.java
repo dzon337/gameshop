@@ -3,9 +3,6 @@ package com.example.backend.model.genre;
 import java.util.Map;
 import java.util.HashMap;
 
-/**
- * This class holds all the information about a genre - ie the description.
- */
 public class GenreDescription {
     private final static Map<EGenreName, String> genreDescriptions  = new HashMap<>() {{
         put(EGenreName.SHOOTER, "Dive into high-octane action, wielding an arsenal of powerful firearms to outmaneuver and outshoot opponents in fast-paced environments.");

@@ -1,14 +1,14 @@
 package com.example.backend.model.review;
 
 import lombok.*;
+
 import java.util.Objects;
+
 import java.io.Serializable;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
-/**
- * Composite key for GameReview.
- */
 @Data
 @Builder
 @ToString
@@ -18,15 +18,11 @@ import jakarta.persistence.Embeddable;
 public class GameReviewKey implements Serializable {
 
     @Column(name="game_id")
-    private Long gameId;   // FK of game to which the review is about.
+    private Long gameId;
 
     @Column(name="review_id")
-    private Long reviewId; // partial key of GameReview
+    private Long reviewId;
 
-    /**
-     * @param o Instance of the same object.
-     * @return True iff gameId and reviewId are the same, otherwise not equal.
-     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

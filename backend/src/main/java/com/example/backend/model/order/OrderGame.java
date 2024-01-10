@@ -1,12 +1,14 @@
 package com.example.backend.model.order;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
+
 import java.util.Objects;
+
 import jakarta.persistence.*;
+
 import com.example.backend.model.game.Game;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Data
 @Builder

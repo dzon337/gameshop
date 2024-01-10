@@ -149,6 +149,37 @@
         min-width: 20px;
         text-align: center;
     }
+
+    .container {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    #my-review textarea {
+        width: 100%;
+        height: 100px;
+        margin-bottom: 10px;
+    }
+    .form-group-rating {
+        margin-bottom: 10px;
+    }
+    #reviewRating {
+        width: 100px;
+    }
+    #submitReview {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    #submitReview:hover {
+        background-color: #0056b3;
+    }
+
 </style>
 <!-- Modal -->
 <div class="modal fade" id="gameModal" tabindex="-1" role="dialog" aria-labelledby="gameModalLabel" aria-hidden="true">
@@ -173,12 +204,9 @@
     let cart = [];
     let gamesData = []; // Store the fetched games data
 
-
-
     function updateCartCounter() {
         document.getElementById('cart-counter').textContent = cart.reduce((acc, item) => acc + item.quantity, 0);
     }
-
 
     function addToCart(gameId) {
         const game = gamesData.find(g => g.gameId === gameId);
@@ -193,7 +221,6 @@
             displayCartPopup();
         }
     }
-
 
     function displayCartPopup() {
         const cartItemsList = document.getElementById('cartItemsList');
@@ -243,11 +270,12 @@
         localStorage.setItem('cart', JSON.stringify(cart));
 
         window.location.href = "/checkout"
-
     }
+
     function logout() {
-        localStorage.clear(); // This will clear all local storage data
-        window.location.href = '/login'; // Redirect to login page or home page
+        localStorage.clear();
+
+        window.location.href = '/login';
     }
 
     function applyFilters() {
@@ -258,28 +286,25 @@
 
         let filteredGames = gamesData;
 
-        // Filter by Genre
         if (genreFilter) {
             filteredGames = filteredGames.filter(game => game.genres.some(g => g.genreName === genreFilter));
         }
 
-        // Filter by Price
         if (priceFilter) {
             filteredGames = filteredGames.filter(game => game.price <= priceFilter);
         }
 
-        // Filter by Platform
         if (platformFilter) {
             filteredGames = filteredGames.filter(game => game.platforms.some(p => p.platformName === platformFilter));
         }
 
-        // Sort by Rating
         if (sortRating) {
             filteredGames.sort((a, b) => sortRating === 'asc' ? a.averageRating - b.averageRating : b.averageRating - a.averageRating);
         }
 
         renderGames(filteredGames);
     }
+
     function renderGames(games) {
         const container = document.getElementById('game-list');
         container.innerHTML = '';
@@ -305,7 +330,6 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        // Populate genres
         const genres = ["SHOOTER", "SPORTS", "ADVENTURE", "OPEN_WORLD", "ACTION", "ROLE_PLAY", "RACING", "FIGHTING", "HORROR", "MULTIPLAYER"];
         const genreSelect = document.getElementById('filterGenre');
         genres.forEach(genre => {
@@ -315,7 +339,6 @@
             genreSelect.appendChild(option);
         });
 
-        // Populate platforms
         const platforms = ["PLAYSTATION_5", "PLAYSTATION_4", "PLAYSTATION_2", "XBOX_360", "XBOX_SERIES_X", "NINTENDO_SWITCH", "PERSONAL_COMPUTER"];
         const platformSelect = document.getElementById('filterPlatform');
         platforms.forEach(platform => {
@@ -324,6 +347,7 @@
             option.textContent = platform;
             platformSelect.appendChild(option);
         });
+
         fetch('http://localhost:8080/games/all')
             .then(response => {
                 if (!response.ok) {
@@ -340,21 +364,18 @@
             })
             .catch(error => console.error('Error fetching data:', error));
 
-
         updateNavBar();
         function calculateAverageRating(reviews) {
             if (!reviews || reviews.length === 0) {
-                return 0; // Return 0 if there are no reviews
+                return 0;
             }
             const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
             return totalRating / reviews.length;
         }
 
-        const isLoggedIn = localStorage.getItem('isLoggedIn'); // You should set this item in local storage on login
-
         function updateNavBar() {
             const navItems = document.getElementById('nav-items');
-            // Example check - replace with your actual login check logic
+            const isLoggedIn = localStorage.getItem('isLoggedIn'); // You should set this item in local storage on login
 
             if (isLoggedIn) {
                 const username = localStorage.getItem('username'); // Assuming you store the username in local storage on login
@@ -362,24 +383,22 @@
                 <li class="nav-item">
                     <span class="nav-link">Logged in as ${username}</span>
                 </li>
-            <li class="nav-item">
-                <a class="nav-link"  id="cart-button">
-                    <i class="fas fa-shopping-cart"></i> Cart <span id="cart-counter">0</span>
-                </a>
-            </li>
-               <li class="nav-item">
+                <li class="nav-item">
+                    <a class="nav-link"  id="cart-button">
+                        <i class="fas fa-shopping-cart"></i> Cart <span id="cart-counter">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <form class="form-inline my-2 my-lg-0">
                         <input class="form-control mr-sm-2" type="search" placeholder="Search Users" aria-label="Search">
                         <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
                     </form>
                 </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="#" onclick="logout()">Logout</a>
-            </li>
-
-            `;
-            } else {
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="logout()">Logout</a>
+                </li> `;
+            }
+            else {
                 navItems.innerHTML = `
                 <li class="nav-item">
                     <a class="nav-link" href="/login">Login</a>
@@ -387,36 +406,70 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/register">Register</a>
                 </li>
-           <li class="nav-item">
-                <a class="nav-link"  id="cart-button">
-                    <i class="fas fa-shopping-cart"></i> Cart <span id="cart-counter">0</span>
-                </a>
-            </li>
-            `;
+                <li class="nav-item">
+                    <a class="nav-link"  id="cart-button">
+                        <i class="fas fa-shopping-cart"></i> Cart <span id="cart-counter">0</span>
+                    </a>
+                </li>`;
             }
         }
+
+
+
+
+
+        // TODO -> Fix the rendering of the data.
         window.showGameDetails = function(game) {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+
             $('#gameModalLabel').text(game.gameName);
+
             $('.modal-body').html(`
-        <p><strong>Price:</strong> $${game.price}</p>
-        <div class="genre-list">
-            ${game.genres.map(g => `<p>${g.genreName}</p><p class="genre-description">${g.description}</p>`).join('')}
-        </div>
-        <div class="platform-list">
-            <p><strong>Platforms:</strong> ${game.platforms.map(p => `${p.platformName} (${p.manufacturer})`).join(', ')}</p>
-        </div>
-        <div id="reviews">
-            <h3>Add your review:</h3>
-            <div><textarea/>
-                                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Submit</button>
-</div>
-        </div>
-         <div id="game-reviews">
-            <h3>Reviews:</h3>
-            <div>Loading reviews...</div>
-        </div>
-    `);
+                <!-- Information about the game -->
+                <p><strong>Price:</strong> ${game.price}</p>
+                <div class="genre-list">
+                    ${game.genres.map(g => `<p>${g.genreName}</p><p class="genre-description">${g.description}</p>`).join('')}
+                </div>
+                <div class="platform-list">
+                    <p><strong>Platforms:</strong> ${game.platforms.map(p => `${p.platformName} (${p.manufacturer})`).join(', ')}</p>
+                </div>
+
+                <!-- Ability to upload a review iff a person is loggen in. -->
+                ${isLoggedIn ? `
+                    <div id="my-review">
+                        <h3>Rate the game!</h3>
+                        <textarea name="my-review-text" id="my-review-text"></textarea>
+                        <div class="form-group-rating">
+                        <p><strong>Rating: </strong></p>
+                        <select id="reviewRating" name="reviewRating" class="form-control-review">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    </div>
+                    <button id="submitReview" class="btn btn-outline-success my-2 my-sm-0">Upload</button>
+                </div>` : ''}
+
+                <!-- Reviews that might be already present. -->
+                <div id="game-reviews">
+                    <h3>Reviews:</h3>
+                    <div>Loading reviews...</div>
+                </div>
+            `);
+
+            if(isLoggedIn) {
+                document.getElementById('submitReview').addEventListener('click', createSubmitReviewHandler(game.gameId));
+            }
+
             $('#gameModal').modal('show');
+
             fetch(`http://localhost:8080/games/${game.gameId}/reviews`)
                 .then(response => response.json())
                 .then(reviews => {
@@ -425,7 +478,7 @@
                     <p>Rating: ${review.rating}</p>
                     <p>${review.reviewText}</p>
                 </div>
-            `).join('');
+                `).join('');
                     document.getElementById('game-reviews').innerHTML = `<h3>Reviews:</h3>${reviewsHtml}`;
                 })
                 .catch(error => {
@@ -433,6 +486,49 @@
                     document.getElementById('game-reviews').innerHTML = '<p>Error loading reviews.</p>';
                 });
         }
+
+        function createSubmitReviewHandler(gameId) {
+            return function (event) {
+                event.preventDefault();
+
+                const username = localStorage.getItem('username');
+                const reviewText = document.getElementById('my-review-text').value;
+                const rating = document.getElementById('reviewRating').value;
+
+                fetch(`http://localhost:8080/games/${gameId}/uploadReview`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        reviewText: reviewText,
+                        rating: rating
+                    }),
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Review submitted successfully:', data);
+                    })
+                    .catch(error => {
+                        console.error('Error submitting review:', error);
+                    });
+
+                window.location.reload();
+            };
+        }
+
+
+
+
+
+
         const searchForm = document.querySelector('.navbar .form-inline');
         searchForm.addEventListener('submit', function(event) {
             event.preventDefault();
@@ -446,27 +542,22 @@
                 body: JSON.stringify({
                     username: searchQuery
                 })
-            })
-
-                .then(response => {
+            }).then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);
                     }
+
                     return JSON.stringify(response.text());
-                }).then(data => {
+            }).then(data => {
+
                 localStorage.setItem('searchedUser', searchQuery);
-
                 window.location.href = "/profile"
-            })
-
-                .catch(error => console.error('Error fetching user:', error));
+            }).catch(error => console.error('Error fetching user:', error));
         });
 
         document.getElementById('cart-button').addEventListener('click', function() {
             displayCartPopup();
         });
-
-
 
     });
 </script>

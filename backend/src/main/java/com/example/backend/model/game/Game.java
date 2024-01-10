@@ -1,11 +1,14 @@
 package com.example.backend.model.game;
 
 import lombok.*;
+
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Collection;
+
 import jakarta.persistence.*;
+
 import com.example.backend.model.genre.Genre;
 import com.example.backend.model.order.OrderGame;
 import com.example.backend.model.review.GameReview;
@@ -37,15 +40,11 @@ public class Game {
     @Column(name="game_price", nullable = false)
     private Float price;
 
-    /*
-     * This constructor is used because the IDs are generated automatically. At every insert of a new game.
-     */
     public Game(final String name, final Float price) {
         this.gameName = name;
         this.price = price;
     }
 
-    // Game can have multiple genres. (N:M relationship with genres)
     @ManyToMany
     @JoinTable(
             name = "game_genre",
@@ -60,7 +59,6 @@ public class Game {
         this.genres.addAll(genres);
     }
 
-    // Game can be available on multiple platforms. (N:M relationship with platforms.)
     @ManyToMany
     @JoinTable(
             name = "game_platform",
@@ -75,7 +73,6 @@ public class Game {
         this.platforms.addAll(platforms);
     }
 
-    // All the reviews about a particular game.
     @OneToMany(mappedBy = "game")
     @JsonManagedReference
     @Builder.Default
@@ -97,9 +94,6 @@ public class Game {
         this.orderGames.addAll(orderGames);
     }
 
-    /**
-     * @return True if the name of both objects is equal. If not - false.
-     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -1,13 +1,16 @@
 package com.example.backend.model.order;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
+
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Collection;
+
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
+
 import com.example.backend.model.user.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -32,7 +35,6 @@ public class Order {
     @Column (name = "order_date", columnDefinition = "DATETIME", nullable = false)
     private LocalDateTime order_date;
 
-    // One user places an order.
     @ManyToOne
     @JsonBackReference
     @JoinColumn(name = "user_id")

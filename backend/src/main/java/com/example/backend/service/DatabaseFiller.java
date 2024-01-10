@@ -1,18 +1,21 @@
 package com.example.backend.service;
 
 import java.util.*;
+
 import java.time.ZoneOffset;
 import java.time.LocalDateTime;
+
 import com.github.javafaker.Faker;
+
 import java.util.stream.IntStream;
 import java.util.stream.Collectors;
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.example.backend.repository.*;
 import com.example.backend.model.user.User;
 import com.example.backend.model.game.Game;
 import com.example.backend.model.order.Order;
 import com.example.backend.model.genre.Genre;
-import org.springframework.stereotype.Service;
-import java.util.concurrent.ThreadLocalRandom;
 import com.example.backend.model.game.GameInfo;
 import com.example.backend.model.order.OrderGame;
 import com.example.backend.model.genre.EGenreName;
@@ -25,7 +28,10 @@ import com.example.backend.model.platform.EPlatformName;
 import com.example.backend.model.platform.EManufacturer;
 import com.example.backend.model.genre.GenreDescription;
 import com.example.backend.exceptions.DatabaseFillerException;
+
+import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DatabaseFiller {
@@ -57,12 +63,11 @@ public class DatabaseFiller {
     @Autowired
     private IGameRepository gameRepo;
     @Autowired
-    private IGameReview gameReviewRepo;
-    @Autowired
     private IGenreRepository genreRepo;
     @Autowired
     private IPlatformRepository platformRepo;
-
+    @Autowired
+    private IGameReviewRepository gameReviewRepo;
     @Autowired
     private IOrderRepository orderRepo;
     @Autowired
@@ -70,28 +75,46 @@ public class DatabaseFiller {
 
     public void insertDummyData() {
         try {
-            this.generateUsers();                 // User
-            this.generateFriendships();           // Friendship
-            this.generateGenres();                // Genre
-            this.generatePlatforms();             // Platform
-            this.generateGames();                 // Game
-            this.generateGameGenreGamePlatform(); // GameGenre + GamePlatform
-            this.generateGameReviews();           // GameReview
-            this.generateOrders();                // Order + OrderGame
+            this.deleteData();
+
+            this.generateUsers();
+            this.generateFriendships();
+            this.generateGenres();
+            this.generatePlatforms();
+            this.generateGames();
+            this.generateGameGenreGamePlatform();
+            this.generateGameReviews();
+            this.generateOrders();
         }
         catch(Exception e) {
-            System.err.println("Error during database data insertion: " + e.getMessage());
-            throw new DatabaseFillerException("Error occurred while trying to fill database with dummy data!");
+            throw new DatabaseFillerException("Error during database data insertion: " + e.getMessage());
         }
     }
 
+    @Transactional
+    public void deleteData() {
+        this.gameOrderRepo.deleteAll();
+        this.orderRepo.deleteAll();
+        this.gameReviewRepo.deleteAll();
+        this.detachGamesFromGenresAndPlatforms();
+        this.genreRepo.deleteAll();
+        this.platformRepo.deleteAll();
+        this.gameRepo.deleteAll();
+        this.userRepo.deleteAll();
+    }
+
+    private void detachGamesFromGenresAndPlatforms() {
+        final List<Game> games = this.gameRepo.findAll();
+
+        for (Game game : games) {
+            game.setGenres(new HashSet<>());
+            game.setPlatforms(new HashSet<>());
+        }
+
+        this.gameRepo.saveAll(games);
+    }
+
     private void generateUsers() {
-        /*
-         * Create a stream from 0 to specified user count and map each index to a specific user
-         * with randomly generated data using the Faker library. Additionally adding a number
-         * between 0 and 10 for each user at teh start of username and email just to avoid
-         * errors because both username and email should be unique.
-         */
         final Set<User> users = IntStream.
                                     range(0, USER_COUNT)
                                     .mapToObj(userIndex -> User
@@ -110,29 +133,23 @@ public class DatabaseFiller {
     private void generateFriendships() {
         final List<User> allUsers = this.userRepo.findAll();
 
-        // Go over each user.
         for(int userIndex = 0; userIndex < USER_COUNT; ++userIndex) {
             final User currentUser = allUsers.get(userIndex);
 
-            // Generate a number of users to be friends with.
             final int userFriendsCount = RANDOM.nextInt(MIN_FRIENDS, MAX_FRIENDS + 1);
-            // Generate userFriendsCount random ids
             for (int friendCounter = 0; friendCounter < userFriendsCount; ++friendCounter) {
                 final Long randomFriendId = RANDOM.nextLong(0, USER_COUNT);
 
-                // Only add him if they have different ids. If not skip. (You cannot befriend yourself)
                 if (randomFriendId.equals(currentUser.getUser_id())) {
                     continue;
                 }
 
-                // If they have different ids check if they're not already friends.
                 final boolean alreadyFriends = currentUser
                         .getFriends()
                         .stream()
                         .anyMatch(possibleFriend ->
                                 possibleFriend.getUser_id().equals(randomFriendId)
                         );
-
 
                 if (!alreadyFriends) {
                     final Optional<User> possibleNewFriend = this.userRepo.findById(randomFriendId);
@@ -145,10 +162,6 @@ public class DatabaseFiller {
     }
 
     private void generateGenres() {
-        /*
-         * Create a stream from 0 to specified genre count and map each genreType to a specific Genre
-         * object passing a description defined in the GenreDescription class.
-         */
         final Set<Genre> genres = IntStream
                                     .range(0, GENRE_COUNT)
                                     .mapToObj(GENRE_TYPES::get)
@@ -165,11 +178,6 @@ public class DatabaseFiller {
     private void generatePlatforms() {
         final Set<Platform> platforms = new HashSet<>();
 
-        /*
-         * Creating a stream from 0 to platform count and mapping each platform type
-         * tp a Platform object. Also using enhanced switch statement to assign the
-         * manufacturer directly to the platform name.
-         */
         IntStream.range(0, PLATFORM_COUNT)
                  .mapToObj(PLATFORM_NAMES::get)
                  .forEach(platformType -> {
@@ -212,7 +220,6 @@ public class DatabaseFiller {
         List<Platform> updatedPlatforms = new ArrayList<>();
 
         for (var gameEntry : GameInfo.games) {
-            // Custom data in GameInfo class. [Hardcoded]
             final String gameName = gameEntry.game().getGameName();
             final Set<EGenreName> gameGenresNames = gameEntry.genres();
             final Set<EPlatformName> gamePlatformsNames = gameEntry.platforms();
@@ -235,14 +242,11 @@ public class DatabaseFiller {
                     possiblePlatform.ifPresent(gamePlatforms::add);
                 });
 
-                // Actual game stored in the repository.
                 final Game game = possibleGame.get();
 
-                // Update genres + platforms.
                 game.addGenres(gameGenres);
                 game.addPlatforms(gamePlatforms);
 
-                // Reverse
                 for (Genre genre : gameGenres) {
                     genre.addGame(game);
                     updatedGenres.add(genre);
@@ -261,15 +265,13 @@ public class DatabaseFiller {
     }
 
     private void generateGameReviews() {
-        // Get all users + games. A review is related to user and game.
         final List<User> allUsers = this.userRepo.findAll();
         final List<Game> allGames = this.gameRepo.findAll();
         final int gameCount = allGames.size();
 
-        List<GameReview> allGameReviews = new ArrayList<>();
+        final List<GameReview> allGameReviews = new ArrayList<>();
 
         for (int userId = 0; userId < USER_COUNT; ++userId) {
-            // Fetch user.
             final User currentUser = allUsers.get(userId);
 
             final int userReviewCount = RANDOM.nextInt(MIN_REVIEWS, MAX_REVIEWS);
@@ -281,8 +283,8 @@ public class DatabaseFiller {
                 final int sentenceLength = RANDOM.nextInt(MIN_REVIEW_SENTENCE, MAX_REVIEW_SENTENCE);
                 final String text = FAKER.lorem().paragraph(sentenceLength);
 
-                // Composite key.
-                final GameReviewKey compositeKey = GameReviewKey.builder()
+                final GameReviewKey compositeKey = GameReviewKey
+                        .builder()
                         .reviewId(GameReview.getID())
                         .gameId(game.getGameId())
                         .build();
@@ -291,24 +293,19 @@ public class DatabaseFiller {
                         .gameReviewId(compositeKey)
                         .reviewText(text)
                         .rating(rating)
-                        .user(currentUser)
                         .build();
-
-                gameReview.setGame(game);
-                gameReview.setUser(currentUser);
-
-                // Add to the list
-                allGameReviews.add(gameReview);
 
                 game.addReview(gameReview);
                 currentUser.addReview(gameReview);
+
+                gameReview.setUser(currentUser);
+                gameReview.setGame(game);
+
+                allGameReviews.add(gameReview);
             }
         }
 
-        // Save all reviews at once
         this.gameReviewRepo.saveAll(allGameReviews);
-
-        // Save all users and games
         this.userRepo.saveAll(allUsers);
         this.gameRepo.saveAll(allGames);
     }
@@ -318,34 +315,27 @@ public class DatabaseFiller {
         final List<Game> allGames = this.gameRepo.findAll();
         final int gameCount = allGames.size();
 
-        // Go over each and every user that is already located in the database.
         for(int userIndex = 0; userIndex < USER_COUNT; ++userIndex) {
             final User user = allUsers.get(userIndex);
-            final int userOrderCount = RANDOM.nextInt(MIN_USER_ORDERS, MAX_USER_ORDERS); // A random amount of games a user will buy in one order.
+            final int userOrderCount = RANDOM.nextInt(MIN_USER_ORDERS, MAX_USER_ORDERS);
 
-            // For this example each order will consist of multiple games.
             final int methodIndex = RANDOM.nextInt(0, SHIPPING_METHOD_COUNT);
             final Order order = Order
                     .builder()
                     .orderId(Order.getID())
                     .shippingMethod(SHIPPING_METHODS.get(methodIndex))
                     .order_date(generateRandomDateTime())
-                    .user(user) // Map the user to the order.
+                    .user(user)
                     .build();
 
-            // Map the order to the user.
             user.addOrder(order);
 
-            // All the ordered games in one order.
             final Collection<OrderGame> orderedGames = new HashSet<>();
 
-            // Each user makes a random amount of orders.
             for(int orderIndex = 0; orderIndex < userOrderCount; ++orderIndex) {
-                // Generate random game.
                 final int randomGameId = RANDOM.nextInt(0, gameCount);
                 final Game game = allGames.get(randomGameId);
 
-                // Composite key of a OrderGame object having orderId + gameId.
                 final OrderGameKey orderGameKey = OrderGameKey
                         .builder()
                         .orderId(order.getOrderId())
@@ -355,37 +345,28 @@ public class DatabaseFiller {
                 final OrderGame orderGame = OrderGame
                         .builder()
                         .orderGameId(orderGameKey)
-                        .order(order)   // Map the order to the OrderGame.
-                        .game(game)     // Map it to a game.
+                        .order(order)
+                        .game(game)
                         .quantity(RANDOM.nextInt(MIN_GAME_QUANTITY, MAX_GAME_QUANTITY))
                         .build();
 
-                // This is specific to an order.
                 orderedGames.add(orderGame);
-
-                // Map order of game to game.
                 game.addOrderGames(Set.of(orderGame));
             }
-
-            // Get all the games that are in the order.
             order.addOrderGames(orderedGames);
 
             this.orderRepo.save(order);
             this.gameOrderRepo.saveAll(orderedGames);
         }
 
-        // Save all new and updated data in the repository.
         this.userRepo.saveAll(allUsers);
         this.gameRepo.saveAll(allGames);
     }
 
     private LocalDateTime generateRandomDateTime() {
-        // You can customize the range as per your requirements
         long startEpochSecond = LocalDateTime.of(2023, 1, 1, 0, 0).toEpochSecond(ZoneOffset.UTC);
         long endEpochSecond = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
-
         long randomEpochSecond = ThreadLocalRandom.current().nextLong(startEpochSecond, endEpochSecond);
-
         return LocalDateTime.ofEpochSecond(randomEpochSecond, 0, ZoneOffset.UTC);
     }
 

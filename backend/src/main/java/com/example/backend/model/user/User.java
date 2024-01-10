@@ -1,15 +1,17 @@
 package com.example.backend.model.user;
 
 import lombok.*;
+
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Objects;
+
 import jakarta.persistence.*;
+
 import com.example.backend.model.order.Order;
 import com.example.backend.model.review.GameReview;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import org.springframework.security.core.userdetails.UserDetails;
 
 @Data
 @Builder
@@ -17,8 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @AllArgsConstructor
 @Entity
 @ToString
-@Table(
-        name = "users")
+@Table(name = "users")
 public class User  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,7 +49,6 @@ public class User  {
         this.password = pass;
     }
 
-    // n:m friendship relationship. (Recursive relationship between User)
     @ManyToMany(cascade = {CascadeType.ALL})
     @JoinTable(
             name = "friendships",
@@ -57,19 +57,13 @@ public class User  {
     )
     @JsonManagedReference
     @Builder.Default
-    @ToString.Exclude // Exclude from toString
+    @ToString.Exclude
+    private Set<User> friends = new HashSet<>();
 
-    private Set<User> friends = new HashSet<>(); // Friends of current user.
-
-    /**
-     * You add the new user in your friends list.
-     * @param newFriend A new friend. When befriending someone new this method has to be called.
-     */
     public void addFriend(final User newFriend) {
         this.friends.add(newFriend);
     }
 
-    // A user can write many reviews.
     @OneToMany(mappedBy = "user")
     @JsonManagedReference
     @Builder.Default
@@ -79,18 +73,16 @@ public class User  {
         this.reviews.add(review);
     }
 
-    // A user can place many orders.
     @OneToMany(mappedBy = "user")
     @JsonManagedReference
     @Builder.Default
-    @ToString.Exclude // Exclude from toString
+    @ToString.Exclude
     private Set<Order> orders = new HashSet<>();
 
     public void addOrder(final Order order) {
         this.orders.add(order);
     }
 
-    // Only compare users based on username and email because those values are unique.
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

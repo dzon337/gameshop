@@ -11,6 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 @Repository
 public interface IGameReviewRepository extends JpaRepository<GameReview, GameReviewKey> {
 
-    List<GameReview> findByGameReviewIdGameId(Long gameId);
+    List<GameReview> findByGameReviewIdGameId(final Long gameId);
 
 }

@@ -1,33 +1,32 @@
 package com.example.backend.service;
 
-import com.example.backend.model.order.EShippingMethod;
+import java.time.ZoneId;
+import java.time.Instant;
+import java.time.LocalDateTime;
+
+import java.util.Set;
+import java.util.List;
+import java.util.HashSet;
+
 import com.example.backend.model.order.Order;
 import com.example.backend.model.order.OrderGame;
 import com.example.backend.model.order.OrderGameKey;
 import com.example.backend.model.request.OrderRequest;
-import com.example.backend.repository.IOrderRepository;
 import com.example.backend.repository.IGameRepository;
 import com.example.backend.repository.IUserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.backend.repository.IOrderRepository;
+import com.example.backend.model.order.EShippingMethod;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 @Service
 public class OrderService {
-    private final static List<EShippingMethod> SHIPPING_METHODS = List.of(EShippingMethod.values());
 
     private final IOrderRepository orderRepository;
     private final IUserRepository userRepository;
     private final IGameRepository gameRepository;
 
-    @Autowired
     public OrderService(IOrderRepository orderRepository, IUserRepository userRepository, IGameRepository gameRepository) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
@@ -72,5 +71,4 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    // Additional methods for order management
 }

@@ -1,8 +1,5 @@
 package com.example.backend.model.genre;
 
-/**
- * Additional genres can be added.
- */
 public enum EGenreName {
     SHOOTER ("Shooter"),
     SPORTS ("Sports"),

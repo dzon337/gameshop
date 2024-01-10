@@ -39,15 +39,12 @@
     document.getElementById('registrationForm').addEventListener('submit', function(event) {
         event.preventDefault();
 
+        const emailValue = document.getElementById('email').value;
+        const firstNameValue = document.getElementById('firstName').value;
+        const lastNameValue = document.getElementById('lastName').value;
+        const usernameValue = document.getElementById('username').value;
+        const passwordValue = document.getElementById('password').value;
 
-            const emailValue = document.getElementById('email').value;
-        const   firstNameValue = document.getElementById('firstName').value;
-        const   lastNameValue = document.getElementById('lastName').value;
-        const    usernameValue =  document.getElementById('username').value;
-        const    passwordValue =document.getElementById('password').value;
-
-
-        // Send the form data using fetch
         fetch('http://localhost:8080/user/register', {
             method: 'POST',
             headers: {
@@ -66,19 +63,17 @@
                 if (!response.ok) {
                     throw new Error('Network response was not ok ' + response.statusText );
                 }
+
                 return response.json();
             })
             .then(data => {
                 console.log('Success:', data);
                 window.location.href ="/login"
-                // Here you can handle redirection after a successful registration or display a success message
             })
             .catch((error) => {
                 console.error('Error:', error);
-                // Here you would handle errors, for example, show an error message to the user
             });
     });
 </script>
-
 </body>
 </html>

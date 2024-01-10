@@ -1,13 +1,16 @@
 package com.example.backend.repository;
 
+import java.util.Optional;
+
 import com.example.backend.model.user.User;
+
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
-
 @Repository
 public interface IUserRepository extends JpaRepository<User, Long> {
-    Optional<User> findUserByUsername(String username);
+    Optional<User> findUserByUsername(final String username);
+
+    Optional<User> findUserByUsernameAndEmail(String username, final String email);
 
 }

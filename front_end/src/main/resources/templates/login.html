@@ -53,10 +53,9 @@
         })
             .then(response => {
                 if (response.ok) {
-                    // Redirect to /home if the response status code is 200
                     window.location.href = '/home';
-                } else {
-                    // Handle non-200 responses
+                }
+                else {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
             })
@@ -68,7 +67,6 @@
             })
             .catch((error) => {
                 console.error('Error:', error);
-                // Handle errors here
             });
     });
 </script>

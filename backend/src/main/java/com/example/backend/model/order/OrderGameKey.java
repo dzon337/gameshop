@@ -1,14 +1,14 @@
 package com.example.backend.model.order;
 
 import lombok.*;
+
 import java.util.Objects;
+
 import java.io.Serializable;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
-/**
- * Composite key for the OrderGame object. Each OrderGame has a specific orderId + gameId and quantity.
- */
 @Data
 @Builder
 @ToString

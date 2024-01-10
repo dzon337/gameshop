@@ -1,11 +1,15 @@
 package com.example.backend.service;
 
-import com.example.backend.model.request.RegisterRequest;
+import java.util.Optional;
+
 import com.example.backend.model.user.User;
 import com.example.backend.repository.IUserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import com.example.backend.model.request.RegisterRequest;
+import com.example.backend.exceptions.UserAlreadyExistsException;
+
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+
 
 @Service
 public class RegisterService {
@@ -13,16 +17,23 @@ public class RegisterService {
     @Autowired
     private IUserRepository userRepository;
 
+    public User register(final RegisterRequest request) {
+        final Optional<User> possibleUser =
+                this.userRepository.findUserByUsernameAndEmail(request.getUsername(), request.getEmail());
 
-    public User register(RegisterRequest request) {
-        var user = User.builder()
-                .firstname(request.getFirstname())
-                .lastname(request.getLastname())
-                .email(request.getEmail())
-                .password(request.getPassword())
-                .username(request.getUsername())
-                .build();
-        return  userRepository.save(user);
+        possibleUser.ifPresent(user -> {
+            throw new UserAlreadyExistsException(user + " already exists!");
+        });
 
+        final User user = User.builder()
+                                .firstname(request.getFirstname())
+                                .lastname(request.getLastname())
+                                .email(request.getEmail())
+                                .password(request.getPassword())
+                                .username(request.getUsername())
+                                .build();
+
+        return userRepository.save(user);
     }
+
 }
