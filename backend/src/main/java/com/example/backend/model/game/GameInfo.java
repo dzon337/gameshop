@@ -6,9 +6,6 @@ import java.util.HashSet;
 import com.example.backend.model.genre.EGenreName;
 import com.example.backend.model.platform.EPlatformName;
 
-/**
- * Holds hardcoded data about all initial games. New ones can be added.
- */
 public class GameInfo {
 
     public final static Set<GameGenrePlatform> games = new HashSet<>() {{

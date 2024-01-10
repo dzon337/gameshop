@@ -1,6 +1,5 @@
 package com.example.backend.controller;
 
-import com.example.backend.model.order.Order;
 import com.example.backend.service.OrderService;
 import com.example.backend.model.request.OrderRequest;
 
@@ -12,15 +11,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 @CrossOrigin
 @RequestMapping("/orders")
 public class OrderController {
-    private final OrderService orderService;
+
     @Autowired
-    public OrderController(OrderService orderService) {
-        this.orderService = orderService;
-    }
+    private OrderService orderService;
 
     @PostMapping("/create")
-    public ResponseEntity<Order> createOrder(@RequestBody OrderRequest order) {
-        return ResponseEntity.ok(orderService.createOrder(order));
+    public ResponseEntity<?> createOrder(@RequestBody OrderRequest order) {
+        try {
+            return ResponseEntity.ok(orderService.createOrder(order));
+        }
+        catch(Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.example.backend.model.game.Game;
+import com.example.backend.model.request.UpdateGameRequest;
 import com.example.backend.repository.IGameRepository;
 import com.example.backend.exceptions.GameDoesNotExistException;
 
@@ -17,13 +18,13 @@ public class GameService {
     private IGameRepository gameRepository;
 
     public Game getGameById(final Long gameId) {
-        final Optional<Game> game = gameRepository.findById(gameId);
+        final Optional<Game> possibleGame = gameRepository.findById(gameId);
 
-        if(game.isPresent()) {
-            return game.get();
+        if(possibleGame.isPresent()) {
+            return possibleGame.get();
         }
         else {
-            throw new GameDoesNotExistException("Game not found for id :: " + gameId);
+            throw new GameDoesNotExistException("Game not found for ID: " + gameId);
         }
     }
 
@@ -35,8 +36,11 @@ public class GameService {
         return gameRepository.save(game);
     }
 
-    public Game updateGame(final Long gameId, final Game gameDetails) {
+    public Game updateGame(final Long gameId, final UpdateGameRequest gameDetails) {
         final Game game = getGameById(gameId);
+
+        game.setPrice(gameDetails.getNewPrice());
+        game.setGameName(gameDetails.getNewName());
 
         return gameRepository.save(game);
     }

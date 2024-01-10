@@ -60,16 +60,22 @@ public class DatabaseFiller {
 
     @Autowired
     private IUserRepository userRepo;
+
     @Autowired
     private IGameRepository gameRepo;
+
     @Autowired
     private IGenreRepository genreRepo;
+
     @Autowired
     private IPlatformRepository platformRepo;
+
     @Autowired
     private IGameReviewRepository gameReviewRepo;
+
     @Autowired
     private IOrderRepository orderRepo;
+
     @Autowired
     private IOrderGameRepository gameOrderRepo;
 

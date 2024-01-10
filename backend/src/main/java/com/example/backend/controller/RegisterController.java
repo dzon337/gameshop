@@ -21,13 +21,15 @@ public class RegisterController {
 
     @Autowired
     private RegisterService registerService;
+
     @Autowired
     private LoginService loginService;
+
     @Autowired
     private FriendService friendRequestService;
 
     @PostMapping("/register")
-    public ResponseEntity registerUser(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
         try {
             return ResponseEntity.ok(registerService.register(request));
         }
@@ -37,7 +39,7 @@ public class RegisterController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity loginUser(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest request) {
         try {
             return ResponseEntity.ok(loginService.login(request));
         }
@@ -46,7 +48,7 @@ public class RegisterController {
         }
     }
     @PostMapping("/search")
-    public ResponseEntity searchUserByUsername(@RequestBody SearchRequest username) {
+    public ResponseEntity<?> searchUserByUsername(@RequestBody SearchRequest username) {
         try {
             return ResponseEntity.ok(loginService.search(username));
         }

@@ -33,7 +33,8 @@ public class RegisterService {
                                 .username(request.getUsername())
                                 .build();
 
-        return userRepository.save(user);
+        userRepository.save(user);
+        return user;
     }
 
 }

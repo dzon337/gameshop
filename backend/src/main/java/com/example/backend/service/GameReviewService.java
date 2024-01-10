@@ -34,25 +34,28 @@ public class GameReviewService {
         return this.gameReviewRepo.findByGameReviewIdGameId(gameId);
     }
 
-    public Optional<GameReview> updateReview(final Long gameId, final Long reviewId, final UpdateGameReviewRequest request) {
+    public String updateReview(final Long gameId, final Long reviewId, final UpdateGameReviewRequest request) {
         final GameReviewKey compositeKey = GameReviewKey
-                .builder()
-                .reviewId(reviewId)
-                .gameId(gameId)
-                .build();
+                                                    .builder()
+                                                    .reviewId(reviewId)
+                                                    .gameId(gameId)
+                                                    .build();
 
         final Optional<GameReview> possibleGameReview = this.gameReviewRepo.findById(compositeKey);
+        if(possibleGameReview.isEmpty()) {
+            return "Update didn't take place. Make sure the provided IDs are correct!";
+        }
 
-        possibleGameReview.ifPresent(gameReview -> {
-            gameReview.setReviewText(request.getReviewText());
-            gameReview.setRating(request.getRating());
-            this.gameReviewRepo.save(gameReview);
-        });
+        final GameReview gameReview = possibleGameReview.get();
+        gameReview.setReviewText(request.getNewReviewText());
+        gameReview.setRating(request.getNewRating());
 
-        return Optional.empty();
+        this.gameReviewRepo.save(gameReview);
+
+        return "Successful update. New GameReview: " + this.gameReviewRepo.findById(compositeKey);
     }
 
-    public Optional<GameReview> deleteReview(final Long gameId, final Long reviewId) {
+    public String deleteReview(final Long gameId, final Long reviewId) {
         final GameReviewKey compositeKey = GameReviewKey
                                                     .builder()
                                                     .reviewId(reviewId)
@@ -62,12 +65,13 @@ public class GameReviewService {
         final Optional<GameReview> possibleGameReview = this.gameReviewRepo.findById(compositeKey);
         if(possibleGameReview.isPresent()) {
             this.gameReviewRepo.deleteById(compositeKey);
+            return "Deleted the GameReview";
         }
 
-        return possibleGameReview;
+        return "GameReview was not found for: [gameId=" + gameId + ", reviewId=" + reviewId + "]";
     }
 
-    public GameReview uploadGameReview(final Long gameId, final GameReviewRequest request) {
+    public String uploadGameReview(final Long gameId, final GameReviewRequest request) {
         final Optional<User> possibleUser = userRepo.findUserByUsername(request.getUsername());
         if(possibleUser.isEmpty()) {
             final String errMsg = "User: [" + request.getUsername() + "] does not exist!";
@@ -102,7 +106,9 @@ public class GameReviewService {
                 .findFirst();
 
         reviewMayAlreadyExist.ifPresent(review -> {
-                    throw new UserAlreadyUploadedGameReviewForThisGameException();
+                    final String errMsg = "User: " + request.getUsername() +
+                            " already has uploaded a review about this game: " + gameId;
+                    throw new UserAlreadyUploadedGameReviewForThisGameException(errMsg);
                 }
         );
 
@@ -130,7 +136,7 @@ public class GameReviewService {
         this.userRepo.save(user);
         this.gameRepo.save(game);
 
-        return gameReview;
+        return "User: " + user.getUsername() + " added GameReview: " + gameReview;
     }
 
 }

@@ -10,6 +10,8 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateGameReviewRequest {
-    private String reviewText;
-    private Integer rating;
+
+    private String newReviewText;
+    private Integer newRating;
+
 }

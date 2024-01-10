@@ -1,14 +1,14 @@
 package com.example.backend.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import com.example.backend.model.game.Game;
-import com.example.backend.model.request.UpdateGameReviewRequest;
 import com.example.backend.service.GameService;
 import com.example.backend.model.review.GameReview;
 import com.example.backend.service.GameReviewService;
 import com.example.backend.model.request.GameReviewRequest;
+import com.example.backend.model.request.UpdateGameRequest;
+import com.example.backend.model.request.UpdateGameReviewRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,76 +26,87 @@ public class GameController {
     @Autowired
     private GameReviewService gameReviewService;
 
-    // Get a game by ID
     @GetMapping("/{gameId}")
-    public ResponseEntity<Game> getGameById(@PathVariable("gameId") Long gameId) {
-        Game game = gameService.getGameById(gameId);
-        return ResponseEntity.ok(game);
+    public ResponseEntity<?> getGameById(@PathVariable("gameId") Long gameId) {
+        try {
+            final Game game = this.gameService.getGameById(gameId);
+            return ResponseEntity.ok(game);
+        }
+        catch(Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    // Get all games
     @GetMapping("/all")
     public ResponseEntity<List<Game>> getAllGames() {
-        List<Game> games = gameService.getAllGames();
+        final List<Game> games = gameService.getAllGames();
         return ResponseEntity.ok(games);
+    }
+
+    @PostMapping(value="/addGame")
+    public ResponseEntity<?> addGame(@RequestBody Game game) {
+        try {
+            final Game newGame = gameService.addGame(game);
+            return ResponseEntity.ok(newGame);
+        }
+        catch(Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{gameId}")
+    public ResponseEntity<?> updateGame(@PathVariable("gameId") Long gameId, @RequestBody UpdateGameRequest gameDetails) {
+        try {
+            final Game updatedGame = gameService.updateGame(gameId, gameDetails);
+            return ResponseEntity.ok(updatedGame);
+        }
+        catch(Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{gameId}")
+    public void deleteGame(@PathVariable("gameId") Long gameId) {
+        gameService.deleteGame(gameId);
     }
 
     @GetMapping("/{gameId}/reviews")
     public ResponseEntity<List<GameReview>> getReviewsByGameId(@PathVariable Long gameId) {
-        List<GameReview> reviews = gameReviewService.getReviewsByGameId(gameId);
+        final List<GameReview> reviews = gameReviewService.getReviewsByGameId(gameId);
         return ResponseEntity.ok(reviews);
     }
 
     @PostMapping(value = "/{gameId}/uploadReview")
-    public ResponseEntity<GameReview> uploadReview(@PathVariable Long gameId, @RequestBody GameReviewRequest reviewRequest) {
+    public ResponseEntity<String> uploadReview(@PathVariable Long gameId, @RequestBody GameReviewRequest reviewRequest) {
         try {
-            final GameReview newGameReview = this.gameReviewService.uploadGameReview(gameId, reviewRequest);
-            return new ResponseEntity<>(newGameReview, HttpStatus.OK);
+            final String postResult = this.gameReviewService.uploadGameReview(gameId, reviewRequest);
+            return new ResponseEntity<>(postResult, HttpStatus.OK);
         }
         catch(Exception e) {
-            System.err.println(e.getMessage());
-            return new ResponseEntity<>(new GameReview(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
-    @DeleteMapping(value = "/{gameId}+{reviewId}/deleteReview")
-    public ResponseEntity<GameReview> deleteReview(@PathVariable Long gameId, @PathVariable Long reviewId) {
-        final Optional<GameReview> possibleDeletedReview = this.gameReviewService.deleteReview(gameId, reviewId);
-
-        if(possibleDeletedReview.isPresent()) {
-            return new ResponseEntity<>(possibleDeletedReview.get(), HttpStatus.OK);
+    @DeleteMapping(value = "/gameId={gameId}+reviewId={reviewId}/deleteReview")
+    public ResponseEntity<String> deleteReview(@PathVariable Long gameId, @PathVariable Long reviewId) {
+        try {
+            final String deleteResult = this.gameReviewService.deleteReview(gameId, reviewId);
+            return ResponseEntity.ok(deleteResult);
         }
-
-        return new ResponseEntity<>(new GameReview(), HttpStatus.NOT_FOUND);
-    }
-
-    @PutMapping(value="/{gameId}+{reviewId}/updateReview")
-    public ResponseEntity<GameReview> deleteReview(@PathVariable Long gameId, @PathVariable Long reviewId, @RequestBody UpdateGameReviewRequest request) {
-        final Optional<GameReview> possibleDeletedReview = this.gameReviewService.updateReview(gameId, reviewId, request);
-
-        if(possibleDeletedReview.isPresent()) {
-            return new ResponseEntity<>(possibleDeletedReview.get(), HttpStatus.OK);
+        catch(Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        return new ResponseEntity<>(new GameReview(), HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping
-    public ResponseEntity<Game> addGame(@RequestBody Game game) {
-        Game newGame = gameService.addGame(game);
-        return ResponseEntity.ok(newGame);
-    }
-
-    @PutMapping("/{gameId}")
-    public ResponseEntity<Game> updateGame(@PathVariable("gameId") Long gameId, @RequestBody Game gameDetails) {
-        Game updatedGame = gameService.updateGame(gameId, gameDetails);
-        return ResponseEntity.ok(updatedGame);
-    }
-
-    @DeleteMapping("/{gameId}")
-    public ResponseEntity<?> deleteGame(@PathVariable("gameId") Long gameId) {
-        gameService.deleteGame(gameId);
-        return ResponseEntity.ok().build();
+    @PutMapping(value="/gameId={gameId}+reviewId={reviewId}/updateReview")
+    public ResponseEntity<String> deleteReview(@PathVariable Long gameId, @PathVariable Long reviewId, @RequestBody UpdateGameReviewRequest request) {
+        try {
+            final String putResult = this.gameReviewService.updateReview(gameId, reviewId, request);
+            return ResponseEntity.ok(putResult);
+        }
+        catch(Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }
