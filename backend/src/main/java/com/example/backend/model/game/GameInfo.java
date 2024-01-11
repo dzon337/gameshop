@@ -219,6 +219,36 @@ public class GameInfo {
                 Set.of(EPlatformName.PLAYSTATION_4, EPlatformName.Personal_Computer, EPlatformName.NINTENDO_SWITCH)
         ));
 
+        add(new GameGenrePlatform(
+                new Game("Silent Hill: 2", 7.99f),
+                Set.of(EGenreName.HORROR, EGenreName.ACTION),
+                Set.of(EPlatformName.PLAYSTATION_2, EPlatformName.XBOX360)
+        ));
+
+        add(new GameGenrePlatform(
+                new Game("Dishonored: 2", 11.49f),
+                Set.of(EGenreName.ADVENTURE, EGenreName.ACTION, EGenreName.ROLE_PLAY),
+                Set.of(EPlatformName.PLAYSTATION_4, EPlatformName.Personal_Computer, EPlatformName.XBOX_SERIES_X)
+        ));
+
+        add(new GameGenrePlatform(
+                new Game("Diablo II", 4.99f),
+                Set.of(EGenreName.ACTION, EGenreName.ROLE_PLAY),
+                Set.of(EPlatformName.Personal_Computer)
+        ));
+
+        add(new GameGenrePlatform(
+                new Game("Fallout: New Vegas", 13.99f),
+                Set.of(EGenreName.ACTION, EGenreName.ADVENTURE, EGenreName.OPEN_WORLD, EGenreName.ROLE_PLAY),
+                Set.of(EPlatformName.Personal_Computer, EPlatformName.XBOX360)
+        ));
+
+        add(new GameGenrePlatform(
+                new Game("Doom", 5.99f),
+                Set.of(EGenreName.ACTION, EGenreName.SHOOTER, EGenreName.MULTIPLAYER),
+                Set.of(EPlatformName.Personal_Computer)
+        ));
+
     }};
 
 }

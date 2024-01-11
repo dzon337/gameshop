@@ -12,6 +12,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 import com.example.backend.model.user.User;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Data
@@ -25,20 +26,21 @@ public class Order {
     private static Long ORDER_ID = 0L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id", updatable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name="shipping_method", nullable = false)
     private EShippingMethod shippingMethod;
 
     @Column (name = "order_date", columnDefinition = "DATETIME", nullable = false)
-    private LocalDateTime order_date;
+    private LocalDateTime orderDate;
 
     @ManyToOne
     @JsonBackReference
-    @JoinColumn(name = "user_id")
     @ToString.Exclude
+    @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -46,7 +48,6 @@ public class Order {
     @Builder.Default
     @ToString.Exclude
     private Set<OrderGame> orderGames = new HashSet<>();
-
     public void addOrderGames(final Collection<OrderGame> orderGames) {
         this.orderGames.addAll(orderGames);
     }

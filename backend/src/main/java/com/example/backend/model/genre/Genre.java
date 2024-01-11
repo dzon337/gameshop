@@ -42,9 +42,8 @@ public class Genre {
 
     @ManyToMany(mappedBy = "genres")
     @JsonBackReference
-    @Builder.Default // Initializes the Set of Game objects automatically.
+    @Builder.Default
     private Set<Game> games = new HashSet<>();
-
     public void addGame(final Game game) {
         this.games.add(game);
     }
@@ -53,8 +52,8 @@ public class Genre {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Genre genre = (Genre) o;
-        return this.genreName.equals(genre.genreName);
+        Genre otherGenre = (Genre) o;
+        return this.genreName.equals(otherGenre.genreName);
     }
 
     @Override

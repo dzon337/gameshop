@@ -4,8 +4,9 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class GenreDescription {
+
     private final static Map<EGenreName, String> genreDescriptions  = new HashMap<>() {{
-        put(EGenreName.SHOOTER, "Dive into high-octane action, wielding an arsenal of powerful firearms to outmaneuver and outshoot opponents in fast-paced environments.");
+        put(EGenreName.SHOOTER, "Dive into high-octane action, wielding an arsenal of powerful firearms to outmaneuver and out shoot opponents in fast-paced environments.");
         put(EGenreName.SPORTS, "Experience the excitement of virtual athleticism, competing in realistic simulations or fantastical settings across a variety of sports disciplines.");
         put(EGenreName.ADVENTURE, "Embark on immersive journeys, solving puzzles, unraveling mysteries, and making critical decisions that shape the narrative in captivating story-driven adventures.");
         put(EGenreName.OPEN_WORLD, "Explore vast, dynamic landscapes with limitless possibilities, where players can roam freely, discover hidden secrets, and shape their own unique gaming experience.");
@@ -17,10 +18,6 @@ public class GenreDescription {
         put(EGenreName.MULTIPLAYER, "Connect with players worldwide for cooperative or competitive gaming experiences, fostering teamwork or engaging in intense battles across various genres.");
     }};
 
-    /**
-     * @param name The name of the genre.
-     * @return The description corresponding to the genre name.
-     */
     public static String getDescription(final EGenreName name) {
         return genreDescriptions.get(name);
     }

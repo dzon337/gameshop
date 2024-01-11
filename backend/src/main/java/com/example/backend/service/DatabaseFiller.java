@@ -31,7 +31,6 @@ import com.example.backend.exceptions.DatabaseFillerException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DatabaseFiller {
@@ -93,12 +92,11 @@ public class DatabaseFiller {
             this.generateOrders();
         }
         catch(Exception e) {
-            throw new DatabaseFillerException("Error during database data insertion: " + e.getMessage());
+            throw new DatabaseFillerException("Error during data insertion: " + e.getMessage());
         }
     }
 
-    @Transactional
-    public void deleteData() {
+    private void deleteData() {
         this.gameOrderRepo.deleteAll();
         this.orderRepo.deleteAll();
         this.gameReviewRepo.deleteAll();
@@ -327,12 +325,12 @@ public class DatabaseFiller {
 
             final int methodIndex = RANDOM.nextInt(0, SHIPPING_METHOD_COUNT);
             final Order order = Order
-                    .builder()
-                    .orderId(Order.getID())
-                    .shippingMethod(SHIPPING_METHODS.get(methodIndex))
-                    .order_date(generateRandomDateTime())
-                    .user(user)
-                    .build();
+                                   .builder()
+                                   .orderId(Order.getID())
+                                   .shippingMethod(SHIPPING_METHODS.get(methodIndex))
+                                   .orderDate(generateRandomDateTime())
+                                   .user(user)
+                                   .build();
 
             user.addOrder(order);
 

@@ -11,9 +11,9 @@ import lombok.AllArgsConstructor;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateGameRequest {
+public class PutGameReviewRequest {
 
-    private String newName;
-    private Float newPrice;
+    private String newReviewText;
+    private Integer newRating;
 
 }

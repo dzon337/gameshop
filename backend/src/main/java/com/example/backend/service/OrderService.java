@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.HashSet;
 
+import com.example.backend.model.user.User;
 import com.example.backend.model.order.Order;
 import com.example.backend.model.order.OrderGame;
 import com.example.backend.model.order.OrderGameKey;
@@ -26,33 +27,33 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderService {
 
     @Autowired
-    private IOrderRepository orderRepository;
-
-    @Autowired
     private IUserRepository userRepository;
 
     @Autowired
     private IGameRepository gameRepository;
 
+    @Autowired
+    private IOrderRepository orderRepository;
+
     @Transactional
     public Order createOrder(final OrderRequest orderRequest) {
-        var possibleUser = userRepository
-                                .findUserByUsername(orderRequest.getUsername())
-                                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        final User user = userRepository
+                .findUserByUsername(orderRequest.getUsername())
+                .orElseThrow(() -> new UserNotFoundException("User: " + orderRequest.getUsername() + " not found!"));
 
         final LocalDateTime orderDate = LocalDateTime.ofInstant(
                 Instant.parse(orderRequest.getOrderDateTime()),
                 ZoneId.systemDefault()
         );
 
+        final Long orderId = Order.getID();
         final Set<OrderGame> orderGames = new HashSet<>();
-
         for (OrderRequest.Item item : orderRequest.getItems()) {
             var possibleGame = gameRepository
                     .findById(item.getGameId())
                     .orElseThrow(() -> new GameDoesNotExistException("Game not found for ID: " + item.getGameId()));
 
-            final OrderGameKey orderGameKey = new OrderGameKey(null, possibleGame.getGameId());
+            final OrderGameKey orderGameKey = new OrderGameKey(orderId, possibleGame.getGameId());
             final OrderGame orderGame = OrderGame.builder()
                                                     .orderGameId(orderGameKey)
                                                     .game(possibleGame)
@@ -62,9 +63,10 @@ public class OrderService {
         }
 
         final Order order = Order.builder()
-                                    .user(possibleUser)
+                                    .orderId(orderId)
                                     .shippingMethod(EShippingMethod.valueOf(orderRequest.getShippingMethod()))
-                                    .order_date(orderDate)
+                                    .orderDate(orderDate)
+                                    .user(user)
                                     .orderGames(orderGames)
                                     .build();
 

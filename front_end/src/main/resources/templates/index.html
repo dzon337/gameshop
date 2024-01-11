@@ -176,6 +176,24 @@
         cursor: pointer;
         font-size: 16px;
     }
+    #deleteReview {
+        background-color: #FF2121;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    #updateReview {
+        background-color: #00CC00;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
     #submitReview:hover {
         background-color: #0056b3;
     }
@@ -414,11 +432,6 @@
             }
         }
 
-
-
-
-
-        // TODO -> Fix the rendering of the data.
         window.showGameDetails = function(game) {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
 
@@ -437,7 +450,7 @@
                 <!-- Ability to upload a review iff a person is loggen in. -->
                 ${isLoggedIn ? `
                     <div id="my-review">
-                        <h3>Rate the game!</h3>
+                        <h3>Your review:</h3>
                         <textarea name="my-review-text" id="my-review-text"></textarea>
                         <div class="form-group-rating">
                         <p><strong>Rating: </strong></p>
@@ -454,7 +467,9 @@
                             <option value="10">10</option>
                         </select>
                     </div>
-                    <button id="submitReview" class="btn btn-outline-success my-2 my-sm-0">Upload</button>
+                    <button id="submitReview" class="btn btn-outline-success my-2 my-sm-0">Upload Review</button>
+                    <button id="updateReview" class="btn btn-outline-info my-2 my-sm-0">Update Review</button>
+                    <button id="deleteReview" class="btn btn-outline-danger my-2 my-sm-0">Delete Review</button>
                 </div>` : ''}
 
                 <!-- Reviews that might be already present. -->
@@ -465,7 +480,26 @@
             `);
 
             if(isLoggedIn) {
-                document.getElementById('submitReview').addEventListener('click', createSubmitReviewHandler(game.gameId));
+                const username = localStorage.getItem('username');
+
+                document.getElementById('submitReview').addEventListener('click', createSubmitReviewHandler(game.gameId, username));
+                document.getElementById('updateReview').addEventListener('click', createUpdateReviewHandler(game.gameId, username));
+                document.getElementById('deleteReview').addEventListener('click', createDeleteReviewHandler(game.gameId, username));
+
+                fetch(`http://localhost:8080/games/${game.gameId}/reviews/${username}`)
+                    .then(response => response.json())
+                    .then(userReview => {
+                        if (userReview) {
+                            document.getElementById('my-review-text').value = userReview.reviewText;
+                            document.getElementById('reviewRating').value = userReview.rating;
+                        }
+                        else {
+                            console.log("No game review found for: gameId" + game.gameId + " and username: " + username);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching user review:', error);
+                    });
             }
 
             $('#gameModal').modal('show');
@@ -487,47 +521,100 @@
                 });
         }
 
-        function createSubmitReviewHandler(gameId) {
+        function createSubmitReviewHandler(gameId, username) {
             return function (event) {
                 event.preventDefault();
 
-                const username = localStorage.getItem('username');
                 const reviewText = document.getElementById('my-review-text').value;
                 const rating = document.getElementById('reviewRating').value;
 
-                fetch(`http://localhost:8080/games/${gameId}/uploadReview`, {
+                fetch(`http://localhost:8080/games/${gameId}/uploadReview/${username}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        username: username,
                         reviewText: reviewText,
                         rating: rating
                     }),
                 })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! Status: ${response.status}`);
-                        }
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
 
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Review submitted successfully:', data);
-                    })
-                    .catch(error => {
-                        console.error('Error submitting review:', error);
-                    });
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Review submitted successfully:', data);
+                })
+                .catch(error => {
+                    console.error('Error submitting review:', error);
+                });
 
-                window.location.reload();
+                window.location.href = "/home"
             };
         }
 
+        function createDeleteReviewHandler(gameId, username) {
+            return function (event) {
+                event.preventDefault();
 
+                fetch(`http://localhost:8080/games/${gameId}/deleteReview/${username}`, {
+                    method: 'DELETE',
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
 
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Review deleted successfully:', data);
+                })
+                .catch(error => {
+                    console.error('Error deleting review:', error);
+                });
 
+                window.location.href = "/home"
+            };
+        }
 
+        function createUpdateReviewHandler(gameId, username) {
+            return function (event) {
+                event.preventDefault();
+
+                const newReviewTextRequest = document.getElementById('my-review-text').value;
+                const newRatingRequest = document.getElementById('reviewRating').value;
+
+                fetch(`http://localhost:8080/games/${gameId}/updateReview/${username}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        newReviewText: newReviewTextRequest,
+                        newRating: newRatingRequest
+                    }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Review updated successfully:', data);
+                })
+                .catch(error => {
+                    console.error('Error updating review:', error);
+                });
+
+                window.location.href = "/home"
+            };
+        }
 
         const searchForm = document.querySelector('.navbar .form-inline');
         searchForm.addEventListener('submit', function(event) {

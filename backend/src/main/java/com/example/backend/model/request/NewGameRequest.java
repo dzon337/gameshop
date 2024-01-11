@@ -2,16 +2,18 @@ package com.example.backend.model.request;
 
 import lombok.Data;
 import lombok.Builder;
+import lombok.ToString;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 @Data
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateGameReviewRequest {
+public class NewGameRequest {
 
-    private String newReviewText;
-    private Integer newRating;
+    private String gameName;
+    private Float price;
 
 }

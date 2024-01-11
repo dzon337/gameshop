@@ -13,6 +13,7 @@ import com.example.backend.model.genre.Genre;
 import com.example.backend.model.order.OrderGame;
 import com.example.backend.model.review.GameReview;
 import com.example.backend.model.platform.Platform;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -45,6 +46,7 @@ public class Game {
         this.price = price;
     }
 
+
     @ManyToMany
     @JoinTable(
             name = "game_genre",
@@ -54,10 +56,10 @@ public class Game {
     @Builder.Default
     @ToString.Exclude
     private Set<Genre> genres = new HashSet<>();
-
     public void addGenres(final Collection<Genre> genres) {
         this.genres.addAll(genres);
     }
+
 
     @ManyToMany
     @JoinTable(
@@ -68,28 +70,26 @@ public class Game {
     @Builder.Default
     @ToString.Exclude
     private Set<Platform> platforms = new HashSet<>();
-
     public void addPlatforms(final Collection<Platform> platforms) {
         this.platforms.addAll(platforms);
     }
+
 
     @OneToMany(mappedBy = "game")
     @JsonManagedReference
     @Builder.Default
     @ToString.Exclude
     private Set<GameReview> reviews = new HashSet<>();
-
     public void addReview(final GameReview review) {
         this.reviews.add(review);
     }
 
-    // All the orders in which a game is to be found.
+
     @OneToMany(mappedBy = "game")
     @JsonBackReference
     @Builder.Default
     @ToString.Exclude
     private Set<OrderGame> orderGames = new HashSet<>();
-
     public void addOrderGames(final Collection<OrderGame> orderGames) {
         this.orderGames.addAll(orderGames);
     }
@@ -98,9 +98,8 @@ public class Game {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Game game = (Game) o;
-        // Use to lower case to include Gta V and GTA V.
-        return Objects.equals(this.gameName.toLowerCase(), game.gameName.toLowerCase());
+        Game otherGame = (Game) o;
+        return Objects.equals(this.gameName.toLowerCase(), otherGame.gameName.toLowerCase());
     }
 
     @Override

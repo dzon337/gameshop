@@ -27,9 +27,9 @@ public class GameReviewKey implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        GameReviewKey that = (GameReviewKey) o;
-        return Objects.equals(gameId, that.gameId) &&
-                Objects.equals(reviewId, that.reviewId);
+        GameReviewKey otherKey = (GameReviewKey) o;
+        return Objects.equals(gameId, otherKey.gameId) &&
+                Objects.equals(reviewId, otherKey.reviewId);
     }
 
     @Override

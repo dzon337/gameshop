@@ -9,10 +9,11 @@ import com.example.backend.model.review.GameReview;
 import com.example.backend.model.review.GameReviewKey;
 import com.example.backend.repository.IGameRepository;
 import com.example.backend.repository.IUserRepository;
-import com.example.backend.model.request.GameReviewRequest;
+import com.example.backend.model.request.PostGameReviewRequest;
 import com.example.backend.repository.IGameReviewRepository;
+import com.example.backend.exceptions.UserNotFoundException;
 import com.example.backend.exceptions.GameDoesNotExistException;
-import com.example.backend.model.request.UpdateGameReviewRequest;
+import com.example.backend.model.request.PutGameReviewRequest;
 import com.example.backend.exceptions.UserAlreadyUploadedGameReviewForThisGameException;
 
 import org.springframework.stereotype.Service;
@@ -34,48 +35,11 @@ public class GameReviewService {
         return this.gameReviewRepo.findByGameReviewIdGameId(gameId);
     }
 
-    public String updateReview(final Long gameId, final Long reviewId, final UpdateGameReviewRequest request) {
-        final GameReviewKey compositeKey = GameReviewKey
-                                                    .builder()
-                                                    .reviewId(reviewId)
-                                                    .gameId(gameId)
-                                                    .build();
-
-        final Optional<GameReview> possibleGameReview = this.gameReviewRepo.findById(compositeKey);
-        if(possibleGameReview.isEmpty()) {
-            return "Update didn't take place. Make sure the provided IDs are correct!";
-        }
-
-        final GameReview gameReview = possibleGameReview.get();
-        gameReview.setReviewText(request.getNewReviewText());
-        gameReview.setRating(request.getNewRating());
-
-        this.gameReviewRepo.save(gameReview);
-
-        return "Successful update. New GameReview: " + this.gameReviewRepo.findById(compositeKey);
-    }
-
-    public String deleteReview(final Long gameId, final Long reviewId) {
-        final GameReviewKey compositeKey = GameReviewKey
-                                                    .builder()
-                                                    .reviewId(reviewId)
-                                                    .gameId(gameId)
-                                                    .build();
-
-        final Optional<GameReview> possibleGameReview = this.gameReviewRepo.findById(compositeKey);
-        if(possibleGameReview.isPresent()) {
-            this.gameReviewRepo.deleteById(compositeKey);
-            return "Deleted the GameReview";
-        }
-
-        return "GameReview was not found for: [gameId=" + gameId + ", reviewId=" + reviewId + "]";
-    }
-
-    public String uploadGameReview(final Long gameId, final GameReviewRequest request) {
-        final Optional<User> possibleUser = userRepo.findUserByUsername(request.getUsername());
+    public String uploadGameReview(final Long gameId, final String username, final PostGameReviewRequest request) {
+        final Optional<User> possibleUser = userRepo.findUserByUsername(username);
         if(possibleUser.isEmpty()) {
-            final String errMsg = "User: [" + request.getUsername() + "] does not exist!";
-            throw new RuntimeException(errMsg);
+            final String errMsg = "User: [" + username + "] does not exist!";
+            throw new UserNotFoundException(errMsg);
         }
 
         final Optional<Game> possibleGame = gameRepo.findById(gameId);
@@ -106,25 +70,24 @@ public class GameReviewService {
                 .findFirst();
 
         reviewMayAlreadyExist.ifPresent(review -> {
-                    final String errMsg = "User: " + request.getUsername() +
-                            " already has uploaded a review about this game: " + gameId;
+                    final String errMsg = username + " has already uploaded a review about this game: " + gameId + "!";
                     throw new UserAlreadyUploadedGameReviewForThisGameException(errMsg);
                 }
         );
 
         final Game game = possibleGame.get();
         final GameReviewKey gameReviewKey = GameReviewKey
-                                                    .builder()
-                                                    .reviewId(GameReview.getID())
-                                                    .gameId(game.getGameId())
-                                                    .build();
+                                                .builder()
+                                                .reviewId(GameReview.getID())
+                                                .gameId(game.getGameId())
+                                                .build();
 
         final GameReview gameReview = GameReview
-                                                    .builder()
-                                                    .gameReviewId(gameReviewKey)
-                                                    .reviewText(reviewText)
-                                                    .rating(rating)
-                                                    .build();
+                                               .builder()
+                                               .gameReviewId(gameReviewKey)
+                                               .reviewText(reviewText)
+                                               .rating(rating)
+                                               .build();
 
         game.addReview(gameReview);
         user.addReview(gameReview);
@@ -136,7 +99,59 @@ public class GameReviewService {
         this.userRepo.save(user);
         this.gameRepo.save(game);
 
-        return "User: " + user.getUsername() + " added GameReview: " + gameReview;
+        return username + " added GameReview: " + gameReview + "!";
+    }
+
+    public String deleteReview(final Long gameId, final String username) {
+        final List<GameReview> gameIdReviews = this.gameReviewRepo.findByGameReviewIdGameId(gameId);
+
+        final Optional<GameReview> possibleUserReview = gameIdReviews
+                .stream()
+                .filter(review -> review.getUser().getUsername().equals(username))
+                .findFirst();
+
+        if(possibleUserReview.isPresent()) {
+            final GameReview toBeDeleted = possibleUserReview.get();
+            this.gameReviewRepo.deleteById(toBeDeleted.getGameReviewId());
+            return "Deleted the GameReview: " + toBeDeleted + "!";
+        }
+
+        return "GameReview was not found for: [gameId=" + gameId + ", username=" + username + "]!";
+    }
+
+    public String updateReview(final Long gameId, final String username, final PutGameReviewRequest request) {
+        final String newReviewText = request.getNewReviewText();
+        if(newReviewText.isEmpty()) {
+            throw new RuntimeException("PUT API call with empty newReviewText!");
+        }
+
+        final Integer newRating = request.getNewRating();
+        if(newRating < GameReview.MIN_GAME_REVIEW_RATING || newRating > GameReview.MAX_GAME_REVIEW_RATING) {
+            throw new RuntimeException("PUT API call with an invalid newRating value: " + newRating + "!");
+        }
+
+        final List<GameReview> gameIdReviews = this.gameReviewRepo.findByGameReviewIdGameId(gameId);
+        final Optional<GameReview> possibleUserReview = gameIdReviews
+                .stream()
+                .filter(review -> review.getUser().getUsername().equals(username))
+                .findFirst();
+
+        if(possibleUserReview.isEmpty()) {
+            return "Update didn't take place. Make sure the provided gameId and username are correct!";
+        }
+
+        final GameReview userGameReview = possibleUserReview.get();
+
+        if(userGameReview.getReviewText().equals(newReviewText) && userGameReview.getRating().equals(newRating)) {
+            throw new RuntimeException("Cannot update review because the same data is provided!");
+        }
+
+        userGameReview.setReviewText(newReviewText);
+        userGameReview.setRating(newRating);
+
+        this.gameReviewRepo.save(userGameReview);
+
+        return "Successful update. New GameReview: " + userGameReview + "!";
     }
 
 }

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 @Entity(name="GameReview")
 @Table(name="game_reviews")
 public class GameReview {
+
     private static Long GAME_REVIEW_ID = 0L;
     public final static Integer MIN_GAME_REVIEW_RATING = 1;
     public final static Integer MAX_GAME_REVIEW_RATING = 10;
@@ -40,7 +41,6 @@ public class GameReview {
     @JoinColumn(name = "game_id", nullable = false)
     @ToString.Exclude
     private Game game;
-
     public void setGame(final Game game) {this.game = game;}
 
     @ManyToOne
@@ -48,7 +48,6 @@ public class GameReview {
     @JoinColumn(name = "user_id")
     @ToString.Exclude
     private User user;
-
     public void setUser(final User user) {
         this.user = user;
     }
@@ -61,8 +60,8 @@ public class GameReview {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        GameReview that = (GameReview) o;
-        return Objects.equals(gameReviewId, that.gameReviewId);
+        GameReview other = (GameReview) o;
+        return Objects.equals(gameReviewId, other.gameReviewId);
     }
 
     @Override

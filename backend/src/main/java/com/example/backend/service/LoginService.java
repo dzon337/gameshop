@@ -20,10 +20,10 @@ public class LoginService {
     private IUserRepository userRepository;
 
     public String login(final LoginRequest request) {
-        final Optional<User> userOptional = userRepository.findUserByUsername(request.getUsername());
+        final Optional<User> possibleUser = userRepository.findUserByUsername(request.getUsername());
 
-        if (userOptional.isPresent()) {
-            final User user = userOptional.get();
+        if (possibleUser.isPresent()) {
+            final User user = possibleUser.get();
 
             if (user.getPassword().equals(request.getPassword())) {
                 return "Login successful";
@@ -38,9 +38,9 @@ public class LoginService {
     }
 
     public String search(final SearchRequest request) {
-        final Optional<User> userOptional = userRepository.findUserByUsername(request.getUsername());
+        final Optional<User> possibleUser = userRepository.findUserByUsername(request.getUsername());
 
-        if (userOptional.isPresent()) {
+        if (possibleUser.isPresent()) {
             return "User is found";
         }
         else {

@@ -20,10 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class RegisterController {
 
     @Autowired
-    private RegisterService registerService;
+    private LoginService loginService;
 
     @Autowired
-    private LoginService loginService;
+    private RegisterService registerService;
 
     @Autowired
     private FriendService friendRequestService;

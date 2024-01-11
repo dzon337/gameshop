@@ -15,7 +15,7 @@ public class FriendService {
     @Autowired
     private IUserRepository userRepository;
 
-    public boolean sendFriendRequest(FriendRequest request) {
+    public boolean sendFriendRequest(final FriendRequest request) {
         final Optional<User> fromUserOpt = userRepository.findUserByUsername(request.getFromUsername());
         final Optional<User> toUserOpt = userRepository.findUserByUsername(request.getToUsername());
 

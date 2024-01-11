@@ -12,13 +12,13 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Data
 @Builder
-@AllArgsConstructor
+@ToString
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity(name="OrderGame")
 @Table(name="order_games")
-@ToString
-
 public class OrderGame {
+
     @EmbeddedId
     @Column(name="order_game_id")
     private OrderGameKey orderGameId;

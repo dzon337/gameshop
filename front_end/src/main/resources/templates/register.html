@@ -59,20 +59,21 @@
             }),
 
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText );
-                }
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText );
+            }
 
-                return response.json();
-            })
-            .then(data => {
-                console.log('Success:', data);
-                window.location.href ="/login"
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+            return response.json();
+        })
+        .then(data => {
+            console.log('Success:', data);
+
+            window.location.href = "/login"
+        })
+        .catch((error) => {
+            console.error('Error has occurred when trying to register:', error);
+        });
     });
 </script>
 </body>

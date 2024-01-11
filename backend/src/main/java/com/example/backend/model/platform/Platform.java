@@ -25,9 +25,10 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
         }
 )
 public class Platform {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "platform_id", updatable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long platform_id;
 
     @Enumerated(EnumType.STRING)
@@ -47,7 +48,6 @@ public class Platform {
     @JsonBackReference
     @Builder.Default
     private Set<Game> games = new HashSet<>();
-
     public void addGame(final Game game) {
         this.games.add(game);
     }

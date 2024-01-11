@@ -15,12 +15,13 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Data
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@ToString
+@Entity(name="User")
 @Table(name = "users")
 public class User  {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", updatable = false)
@@ -59,7 +60,6 @@ public class User  {
     @Builder.Default
     @ToString.Exclude
     private Set<User> friends = new HashSet<>();
-
     public void addFriend(final User newFriend) {
         this.friends.add(newFriend);
     }
@@ -68,7 +68,6 @@ public class User  {
     @JsonManagedReference
     @Builder.Default
     private Set<GameReview> reviews = new HashSet<>();
-
     public void addReview(final GameReview review) {
         this.reviews.add(review);
     }
@@ -78,7 +77,6 @@ public class User  {
     @Builder.Default
     @ToString.Exclude
     private Set<Order> orders = new HashSet<>();
-
     public void addOrder(final Order order) {
         this.orders.add(order);
     }
@@ -87,9 +85,9 @@ public class User  {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(this.username.toLowerCase(), user.username.toLowerCase())
-                && Objects.equals(this.email.toLowerCase(), user.email.toLowerCase());
+        User otherUser = (User) o;
+        return Objects.equals(this.username.toLowerCase(), otherUser.username.toLowerCase())
+                && Objects.equals(this.email.toLowerCase(), otherUser.email.toLowerCase());
     }
 
     @Override

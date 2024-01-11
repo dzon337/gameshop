@@ -74,17 +74,19 @@
 <script>
     window.onload = function() {
         var searchedUser = localStorage.getItem('searchedUser');
+
         if (searchedUser) {
             document.getElementById('userName').textContent = searchedUser;
             document.getElementById('userFound').textContent = 'User is found';
-        } else {
+        }
+        else {
             document.getElementById('userName').textContent = 'User not found';
             document.getElementById('userFound').textContent = '';
         }
     };
 
     function addFriend() {
-        var fromUsername = localStorage.getItem('username'); // Retrieve the current logged-in user's username
+        var fromUsername = localStorage.getItem('username');
         var toUsername = document.getElementById('userName').textContent;
 
         fetch('http://localhost:8080/user/sendFriendRequest', {
@@ -97,27 +99,29 @@
                 toUsername: toUsername
             })
         })
-            .then(response => {
-                if (response.status === 200) {
-                    showFriendRequestMessage('User is successfully added');
-                }
-                else {
-                    showFriendRequestMessage('User is already in your friendlist');
-                }
-            })
-            .then(data => {
-                if (data) {
-                    showFriendRequestMessage(data);
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+        .then(response => {
+            if (response.status === 200) {
+                showFriendRequestMessage('User is successfully added');
+            }
+            else {
+                showFriendRequestMessage('User is already in your friend list');
+            }
+        })
+        .then(data => {
+            if (data) {
+                showFriendRequestMessage(data);
+            }
+        })
+        .catch((error) => {
+            console.error('Error has occurred when sending friend request:', error);
+        });
     }
+
     function showFriendRequestMessage(message) {
         var messageElement = document.getElementById('friendRequestMessage');
         messageElement.textContent = message;
         messageElement.style.display = 'block';
+
         setTimeout(function() {
             messageElement.style.display = 'none';
         }, 3000);

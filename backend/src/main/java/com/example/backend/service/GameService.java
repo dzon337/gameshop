@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.example.backend.model.game.Game;
-import com.example.backend.model.request.UpdateGameRequest;
 import com.example.backend.repository.IGameRepository;
 import com.example.backend.exceptions.GameDoesNotExistException;
 
@@ -33,19 +32,33 @@ public class GameService {
     }
 
     public Game addGame(final Game game) {
-        return gameRepository.save(game);
+        final Optional<Game> possibleGame = this.gameRepository.findGameByGameName(game.getGameName());
+        if(possibleGame.isPresent()) {
+            throw new RuntimeException("Game " + game.getGameName() + " already present!");
+        }
+
+        this.gameRepository.save(game);
+
+        return game;
     }
 
-    public Game updateGame(final Long gameId, final UpdateGameRequest gameDetails) {
-        final Game game = getGameById(gameId);
+    public Game updateGame(final Long gameId, final Game newGame) {
+        final Optional<Game> possibleGame = this.gameRepository.findById(gameId);
+        if(possibleGame.isEmpty()) {
+            throw new GameDoesNotExistException("Game " + gameId + " not found!");
+        }
 
-        game.setPrice(gameDetails.getNewPrice());
-        game.setGameName(gameDetails.getNewName());
+        final Game updatedGame = possibleGame.get();
+        updatedGame.setGameName(newGame.getGameName());
+        updatedGame.setPrice(newGame.getPrice());
 
-        return gameRepository.save(game);
+        gameRepository.save(updatedGame);
+
+        return updatedGame;
     }
 
-    public void deleteGame(Long gameId) {
+    public void deleteGame(final Long gameId) {
         gameRepository.deleteById(gameId);
     }
+
 }
