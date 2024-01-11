@@ -1,4 +1,5 @@
   version: "3"
+
   services:
     gameshopdb:
       container_name: gameshopdb
@@ -38,12 +39,17 @@
     frontend:
       build: ./front_end
       ports:
-        - "8081:8080"
+        - "8443:8443"
+      environment:
+        - SERVER_PORT=8443
+        - SERVER_SSL_ENABLED=true
+        - SERVER_SSL_KEY_ALIAS=frontend
+        - SERVER_SSL_KEY_STORE_TYPE=PKCS12
+        - SERVER_SSL_KEY_STORE_PASSWORD=123456
+        - SERVER_SSL_KEY_STORE=classpath:keystore.p12
       depends_on:
         backend:
           condition: service_healthy
 
   volumes:
     mysql-data:
-
-
