@@ -37,20 +37,48 @@
         function fillDatabase() {
             fetch('/fillDatabase', { method: 'POST' })
                 .then(response => {
+
                     if (response.ok) {
+
                         console.log('Database filled successfully');
-                        location.reload(); // Reload the page after successful filling
+
+                        location.reload();
+
                     } else {
+
                         console.error('Error filling database');
+
                     }
+
                 })
                 .catch(error => console.error('Error:', error));
         }
+
+        function checkBestseller() {
+            fetch('http://localhost:8080/bestseller')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    return response.json();
+                })
+                .then(bestsellers => {
+                    const dataQueryParam = encodeURIComponent(JSON.stringify(bestsellers));
+
+                    window.location.href = `/bestsellerReport?data=${dataQueryParam}`;
+                })
+                .catch(error => console.error('Error while executing /bestseller query:', error));
+        }
+
+
     </script>
 </head>
 <body>
 <h1>Welcome to Game Shop backend!</h1>
 <p>After clicking the button, all the data is removed if any present and the database is filled with randomized data.</p>
 <button onclick="fillDatabase()">Fill in Database</button>
+<button onclick="checkBestseller()">Check bestsellers</button>
+
 </body>
 </html>

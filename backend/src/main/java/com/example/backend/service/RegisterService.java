@@ -10,7 +10,6 @@ import com.example.backend.exceptions.UserAlreadyRegisteredException;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 @Service
 public class RegisterService {
 

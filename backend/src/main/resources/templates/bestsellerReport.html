@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bestsellers</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #007BFF;
+        }
+
+        p {
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        #bestsellers-list {
+            margin-top: 20px;
+        }
+
+        .genre-list p {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .platform-list p {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Bestselling games</h1>
+
+<div class="container">
+    <div class="col">
+        <label for="filterGenre">Filter by Genre:</label>
+        <select id="filterGenre" class="form-control">
+            <option value="">Filter by Genre</option>
+            <!-- Add options dynamically if needed -->
+        </select>
+    </div>
+    <div class="col">
+        <label for="sortPrice">Sort by Price:</label>
+        <select id="sortPrice" class="form-control">
+            <option value="">Sort by price</option>
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+        </select>
+    </div>
+    <div class="col">
+        <button id="filter" onclick="applyFilters()" class="btn btn-primary">Apply Filters</button>
+    </div>
+
+    <div id="bestsellers-list"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const dataQueryParam = urlParams.get('data');
+    const bestsellersData = JSON.parse(decodeURIComponent(dataQueryParam));
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const dataQueryParam = urlParams.get('data');
+        const bestsellersData = JSON.parse(decodeURIComponent(dataQueryParam));
+
+        const genres = ["SHOOTER", "SPORTS", "ADVENTURE", "OPEN_WORLD", "ACTION", "ROLE_PLAY", "RACING", "FIGHTING", "HORROR", "MULTIPLAYER"];
+        const genreSelect = document.getElementById('filterGenre');
+
+        genres.forEach(genre => {
+            const option = document.createElement('option');
+            option.value = genre;
+            option.textContent = genre;
+            genreSelect.appendChild(option);
+        });
+
+        if (bestsellersData) {
+            renderGames(bestsellersData);
+        } else {
+            console.error('No data found in local storage.');
+        }
+
+    });
+
+    function renderGames(games) {
+        const bestsellersList = document.getElementById('bestsellers-list');
+        bestsellersList.innerHTML = '';
+
+        games.forEach(bestseller => {
+            const listItem = document.createElement('div');
+            listItem.innerHTML = `
+                    <p>${bestseller.gameName}</p>
+                    <p><strong>Price: ${bestseller.gamePrice}$</strong></p>
+                    <p>Genres: ${bestseller.genreNames.join(', ')}</p>
+                    <p><strong>Sold Copies: ${bestseller.soldCopies}</strong></p>
+                    <p><strong>Total Profit: ${bestseller.totalProfit.toFixed(2)}$</strong></p>
+                    <hr>
+                `;
+            bestsellersList.appendChild(listItem);
+        });
+    }
+
+    function applyFilters() {
+        const genreFilter = document.getElementById('filterGenre').value;
+        const sortPrice = document.getElementById('sortPrice').value;
+
+        let filteredGames = bestsellersData;
+
+        if (genreFilter) {
+            filteredGames = filteredGames.filter(game => game.genreNames.includes(genreFilter));
+        }
+
+        if (sortPrice) {
+            filteredGames.sort((a, b) => {
+                if (sortPrice === 'asc') {
+                    return a.totalProfit - b.totalProfit;
+                } else {
+                    return b.totalProfit - a.totalProfit;
+                }
+            });
+        }
+
+        renderGames(filteredGames);
+    }
+</script>
+
+</body>
+</html>

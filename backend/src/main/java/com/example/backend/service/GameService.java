@@ -1,10 +1,13 @@
 package com.example.backend.service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
+import java.math.BigDecimal;
 
 import com.example.backend.model.game.Game;
+import com.example.backend.report.BestSellerGameReport;
 import com.example.backend.repository.IGameRepository;
+import com.example.backend.exceptions.BestSellerReportException;
 import com.example.backend.exceptions.GameDoesNotExistException;
 
 import org.springframework.stereotype.Service;
@@ -59,6 +62,36 @@ public class GameService {
 
     public void deleteGame(final Long gameId) {
         gameRepository.deleteById(gameId);
+    }
+
+    public List<BestSellerGameReport> getBestsellerReport() {
+        try {
+            final List<Object[]> dbResponse = this.gameRepository.bestSellerGames();
+
+            final Map<String, BestSellerGameReport> gameReportsMap = new HashMap<>();
+
+            for (Object[] objectArray : dbResponse) {
+                String gameName = (String) objectArray[0];
+
+                final BestSellerGameReport gameReport = gameReportsMap.computeIfAbsent(gameName, key ->
+                        BestSellerGameReport.builder()
+                                .gameName(gameName)
+                                .gamePrice((Float) objectArray[1])
+                                .soldCopies(new BigDecimal(((Number) objectArray[3]).doubleValue()))
+                                .totalProfit((Double) objectArray[4])
+                                .build()
+                );
+
+                gameReport.getGenreNames().add((String) objectArray[2]);
+            }
+
+            List<BestSellerGameReport> sortedGames = new ArrayList<>(gameReportsMap.values());
+
+            return sortedGames;
+        }
+        catch (Exception e) {
+            throw new BestSellerReportException("Error during fetching report data: " + e.getMessage());
+        }
     }
 
 }

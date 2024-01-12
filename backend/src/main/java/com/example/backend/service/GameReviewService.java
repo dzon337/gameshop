@@ -9,11 +9,11 @@ import com.example.backend.model.review.GameReview;
 import com.example.backend.model.review.GameReviewKey;
 import com.example.backend.repository.IGameRepository;
 import com.example.backend.repository.IUserRepository;
-import com.example.backend.model.request.PostGameReviewRequest;
 import com.example.backend.repository.IGameReviewRepository;
 import com.example.backend.exceptions.UserNotFoundException;
-import com.example.backend.exceptions.GameDoesNotExistException;
 import com.example.backend.model.request.PutGameReviewRequest;
+import com.example.backend.model.request.PostGameReviewRequest;
+import com.example.backend.exceptions.GameDoesNotExistException;
 import com.example.backend.exceptions.UserAlreadyUploadedGameReviewForThisGameException;
 
 import org.springframework.stereotype.Service;
