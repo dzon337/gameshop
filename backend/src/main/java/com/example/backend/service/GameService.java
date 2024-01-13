@@ -20,7 +20,7 @@ public class GameService {
     private IGameRepository gameRepository;
 
     public Game getGameById(final Long gameId) {
-        final Optional<Game> possibleGame = gameRepository.findById(gameId);
+        final Optional<Game> possibleGame = this.gameRepository.findById(gameId);
 
         if(possibleGame.isPresent()) {
             return possibleGame.get();
@@ -69,25 +69,25 @@ public class GameService {
             final List<Object[]> dbResponse = this.gameRepository.bestSellerGames();
 
             final Map<String, BestSellerGameReport> gameReportsMap = new HashMap<>();
-
             for (Object[] objectArray : dbResponse) {
-                String gameName = (String) objectArray[0];
+                final String gameName = (String) objectArray[0];
+                final Float price = (Float) objectArray[1];
+                final BigDecimal soldCopies = new BigDecimal(((Number) objectArray[3]).doubleValue());
+                final Double totalProfit = (Double) objectArray[4];
 
                 final BestSellerGameReport gameReport = gameReportsMap.computeIfAbsent(gameName, key ->
                         BestSellerGameReport.builder()
-                                .gameName(gameName)
-                                .gamePrice((Float) objectArray[1])
-                                .soldCopies(new BigDecimal(((Number) objectArray[3]).doubleValue()))
-                                .totalProfit((Double) objectArray[4])
-                                .build()
+                                                .gameName(gameName)
+                                                .gamePrice(price)
+                                                .soldCopies(soldCopies)
+                                                .totalProfit(totalProfit)
+                                                .build()
                 );
 
                 gameReport.getGenreNames().add((String) objectArray[2]);
             }
 
-            List<BestSellerGameReport> sortedGames = new ArrayList<>(gameReportsMap.values());
-
-            return sortedGames;
+            return new ArrayList<>(gameReportsMap.values());
         }
         catch (Exception e) {
             throw new BestSellerReportException("Error during fetching report data: " + e.getMessage());

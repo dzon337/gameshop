@@ -17,11 +17,11 @@ public class RegisterService {
     private IUserRepository userRepository;
 
     public User register(final RegisterRequest request) {
-        final Optional<User> possibleUser =
-                this.userRepository.findUserByUsernameAndEmail(request.getUsername(), request.getEmail());
-
+        final Optional<User> possibleUser = this.userRepository.findUserByUsername(request.getUsername());
         possibleUser.ifPresent(user -> {
-            throw new UserAlreadyRegisteredException(user.getFirstname() + " " + user.getEmail() + " already registered!");
+            if(user.getEmail().equals(request.getEmail())) {
+                throw new UserAlreadyRegisteredException(user.getFirstname() + " " + user.getEmail() + " already registered!");
+            }
         });
 
         final User user = User.builder()
@@ -32,7 +32,7 @@ public class RegisterService {
                                     .username(request.getUsername())
                                     .build();
 
-        userRepository.save(user);
+        this.userRepository.save(user);
         return user;
     }
 

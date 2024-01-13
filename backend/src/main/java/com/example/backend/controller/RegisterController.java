@@ -31,7 +31,7 @@ public class RegisterController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
         try {
-            return ResponseEntity.ok(registerService.register(request));
+            return ResponseEntity.ok(this.registerService.register(request));
         }
         catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -41,7 +41,7 @@ public class RegisterController {
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest request) {
         try {
-            return ResponseEntity.ok(loginService.login(request));
+            return ResponseEntity.ok(this.loginService.login(request));
         }
         catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -50,7 +50,7 @@ public class RegisterController {
     @PostMapping("/search")
     public ResponseEntity<?> searchUserByUsername(@RequestBody SearchRequest username) {
         try {
-            return ResponseEntity.ok(loginService.search(username));
+            return ResponseEntity.ok(this.loginService.search(username));
         }
         catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -59,13 +59,18 @@ public class RegisterController {
 
     @PostMapping("/sendFriendRequest")
     public ResponseEntity<?> sendFriendRequest(@RequestBody FriendRequest request) {
-        boolean requestSent = friendRequestService.sendFriendRequest(request);
+        try {
+            boolean requestSent = this.friendRequestService.sendFriendRequest(request);
 
-        if (requestSent) {
-            return ResponseEntity.ok().body("Friend request sent successfully.");
+            if (requestSent) {
+                return ResponseEntity.ok().body("Friend request sent successfully.");
+            }
+            else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to send friend request.");
+            }
         }
-        else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to send friend request.");
+        catch(Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

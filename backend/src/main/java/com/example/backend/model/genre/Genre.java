@@ -17,11 +17,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name="Genre")
-@Table(
-        name = "genres",
-        uniqueConstraints = {
-        @UniqueConstraint(name="genre_name_unique", columnNames = "genre_name")}
-)
+@Table(name = "genres")
 public class Genre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

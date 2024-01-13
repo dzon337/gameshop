@@ -141,7 +141,6 @@ public class GameReviewService {
         }
 
         final GameReview userGameReview = possibleUserReview.get();
-
         if(userGameReview.getReviewText().equals(newReviewText) && userGameReview.getRating().equals(newRating)) {
             throw new RuntimeException("Cannot update review because the same data is provided!");
         }

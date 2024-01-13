@@ -70,12 +70,15 @@ public class GameController {
         gameService.deleteGame(gameId);
     }
 
-
-    // Relevant for reviews.
     @GetMapping("/{gameId}/reviews")
-    public ResponseEntity<List<GameReview>> getReviewsByGameId(@PathVariable Long gameId) {
-        final List<GameReview> reviews = gameReviewService.getReviewsByGameId(gameId);
-        return ResponseEntity.ok(reviews);
+    public ResponseEntity<?> getReviewsByGameId(@PathVariable Long gameId) {
+        try {
+            final List<GameReview> reviews = gameReviewService.getReviewsByGameId(gameId);
+            return ResponseEntity.ok(reviews);
+        }
+        catch(Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/{gameId}/reviews/{username}")

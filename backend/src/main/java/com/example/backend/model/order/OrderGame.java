@@ -24,20 +24,20 @@ public class OrderGame {
     private OrderGameKey orderGameId;
 
     @ManyToOne
-    @MapsId("orderId")
-    @JoinColumn(name = "order_id")
-    @JsonManagedReference
     @ToString.Exclude
+    @MapsId("orderId")
+    @JsonManagedReference
+    @JoinColumn(name = "order_id")
     private Order order;
 
     @ManyToOne
     @MapsId("gameId")
+    @ToString.Exclude
     @JsonManagedReference
     @JoinColumn(name = "game_id")
-    @ToString.Exclude
     private Game game;
 
-    @Column(name="quantity")
+    @Column(name="quantity", nullable = false)
     private int quantity;
 
     @Override

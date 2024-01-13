@@ -18,12 +18,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name="Platform")
-@Table(
-        name = "platforms",
-        uniqueConstraints = {
-                @UniqueConstraint(name="platform_name_unique", columnNames = "platform_name")
-        }
-)
+@Table(name = "platforms")
 public class Platform {
 
     @Id
@@ -57,7 +52,7 @@ public class Platform {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Platform platform = (Platform) o;
-        return this.manufacturer == platform.manufacturer && this.platformName == platform.platformName;
+        return this.manufacturer.equals(platform.manufacturer) && this.platformName.equals(platform.platformName);
     }
 
     @Override

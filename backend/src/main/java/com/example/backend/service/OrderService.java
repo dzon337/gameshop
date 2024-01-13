@@ -37,7 +37,7 @@ public class OrderService {
 
     @Transactional
     public Order createOrder(final OrderRequest orderRequest) {
-        final User user = userRepository
+        final User user = this.userRepository
                 .findUserByUsername(orderRequest.getUsername())
                 .orElseThrow(() -> new UserNotFoundException("User: " + orderRequest.getUsername() + " not found!"));
 
@@ -72,7 +72,7 @@ public class OrderService {
 
         orderGames.forEach(orderGame -> orderGame.setOrder(order));
 
-        orderRepository.save(order);
+        this.orderRepository.save(order);
         return order;
     }
 

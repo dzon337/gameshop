@@ -27,10 +27,10 @@ public class User  {
     @Column(name = "user_id", updatable = false)
     private Long user_id;
 
-    @Column(name = "username")
+    @Column(name = "username", nullable = false)
     private String username;
 
-    @Column(name = "firstname",nullable = false)
+    @Column(name = "firstname", nullable = false)
     private String firstname;
 
     @Column(name = "lastname")

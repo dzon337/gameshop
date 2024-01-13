@@ -45,7 +45,7 @@ public class GameReview {
 
     @ManyToOne
     @JsonBackReference
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     @ToString.Exclude
     private User user;
     public void setUser(final User user) {

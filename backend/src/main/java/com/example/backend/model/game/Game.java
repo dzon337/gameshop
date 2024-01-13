@@ -46,7 +46,6 @@ public class Game {
         this.price = price;
     }
 
-
     @ManyToMany
     @JoinTable(
             name = "game_genre",
@@ -59,7 +58,6 @@ public class Game {
     public void addGenres(final Collection<Genre> genres) {
         this.genres.addAll(genres);
     }
-
 
     @ManyToMany
     @JoinTable(
@@ -74,7 +72,6 @@ public class Game {
         this.platforms.addAll(platforms);
     }
 
-
     @OneToMany(mappedBy = "game")
     @JsonManagedReference
     @Builder.Default
@@ -83,7 +80,6 @@ public class Game {
     public void addReview(final GameReview review) {
         this.reviews.add(review);
     }
-
 
     @OneToMany(mappedBy = "game")
     @JsonBackReference

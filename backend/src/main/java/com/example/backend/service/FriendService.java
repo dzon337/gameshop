@@ -5,6 +5,7 @@ import java.util.Optional;
 import com.example.backend.model.user.User;
 import com.example.backend.repository.IUserRepository;
 import com.example.backend.model.request.FriendRequest;
+import com.example.backend.exceptions.CannotBefriendYourselfException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,10 @@ public class FriendService {
         if (fromUserOpt.isPresent() && toUserOpt.isPresent()) {
             final User fromUser = fromUserOpt.get();
             final User toUser = toUserOpt.get();
+
+            if(fromUser.equals(toUser)) {
+                throw new CannotBefriendYourselfException("You cannot send friend request to yourself!");
+            }
 
             if (!fromUser.getFriends().contains(toUser)) {
                 fromUser.addFriend(toUser);

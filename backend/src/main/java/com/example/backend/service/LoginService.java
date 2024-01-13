@@ -20,7 +20,7 @@ public class LoginService {
     private IUserRepository userRepository;
 
     public String login(final LoginRequest request) {
-        final Optional<User> possibleUser = userRepository.findUserByUsername(request.getUsername());
+        final Optional<User> possibleUser = this.userRepository.findUserByUsername(request.getUsername());
 
         if (possibleUser.isPresent()) {
             final User user = possibleUser.get();
@@ -29,16 +29,16 @@ public class LoginService {
                 return "Login successful";
             }
             else {
-                throw new InvalidLoginCredentialsException("Invalid credentials");
+                throw new InvalidLoginCredentialsException("Invalid password!");
             }
         }
         else {
-            throw new UserNotRegisteredException("User not found");
+            throw new UserNotRegisteredException("User not found!");
         }
     }
 
     public String search(final SearchRequest request) {
-        final Optional<User> possibleUser = userRepository.findUserByUsername(request.getUsername());
+        final Optional<User> possibleUser = this.userRepository.findUserByUsername(request.getUsername());
 
         if (possibleUser.isPresent()) {
             return "User is found";
